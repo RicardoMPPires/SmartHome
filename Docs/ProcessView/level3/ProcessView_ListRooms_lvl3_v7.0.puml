@@ -1,0 +1,32 @@
+@startuml
+<style>
+    title {
+      HorizontalAlignment center
+      FontSize 18
+      padding 20
+    }
+</style>
+
+title Use Case - List Existing Rooms \nProcess View Level 3 - Backend Interaction \n Main Success Scenario
+autonumber
+
+!pragma teoz true
+
+box "<<container (C4)>>\n     :Backend" #LightGrey
+  participant "**<<component (C4)>>**\n:Server" as SERVER
+  participant "**<<component (C4)>>**\n:Database" as DB
+end box
+
+[o-> SERVER : GET /rooms
+activate SERVER
+
+SERVER -> DB: Request all rooms
+activate DB
+DB --> SERVER: Retrieve rooms
+deactivate DB
+
+
+[o<-- SERVER : rooms data + HTTP Status
+deactivate SERVER
+
+@enduml

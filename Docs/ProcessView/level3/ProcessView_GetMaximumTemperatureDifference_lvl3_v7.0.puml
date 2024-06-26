@@ -1,0 +1,66 @@
+@startuml
+<style>
+    title {
+      HorizontalAlignment center
+      FontSize 18
+      padding 20
+    }
+</style>
+
+title Use Case - Get Maximum Temperature Difference Between an Outdoor and Indoor Device in a Given Period \nProcess View Level 3 - Backend Interaction \n Main Success Scenario
+autonumber
+
+!pragma teoz true
+
+box "<<container (C4)>>\n     :Backend" #LightGrey
+  participant "**<<component (C4)>>**\n:Server" as SERVER
+  participant "**<<component (C4)>>**\n:Database" as DB
+end box
+
+[o-> SERVER : GET /logs (devices and time information)
+activate SERVER
+
+SERVER -> DB: Find outdoor device
+activate DB
+DB --> SERVER: Retrieve outdoor device
+deactivate DB
+|||
+SERVER -> DB: Find outdoor device location
+activate DB
+DB --> SERVER: Retrieve room
+deactivate DB
+|||
+SERVER -> SERVER: Verify if is an outdoor room
+|||
+SERVER -> DB: Find indoor device
+activate DB
+DB --> SERVER: Retrieve indoor device
+deactivate DB
+|||
+SERVER -> DB: Find indoor device location
+activate DB
+DB --> SERVER: Retrieve room
+deactivate DB
+|||
+SERVER -> SERVER: Verify if is an indoor room
+|||
+SERVER -> SERVER : Verify if time period is valid
+|||
+SERVER -> DB: Get outdoor device logs in time period
+activate DB
+DB --> SERVER: Retrieve logs
+deactivate DB
+|||
+SERVER -> DB: Get indoor device logs in time period
+activate DB
+DB --> SERVER: Retrieve logs
+deactivate DB
+|||
+SERVER -> SERVER : Compute device logs, considering the \nallowed \
+ offset, to get  the maximum \ninstantaneous temperature
+
+
+[o<-- SERVER : request result + HTTP Status
+deactivate SERVER
+
+@enduml

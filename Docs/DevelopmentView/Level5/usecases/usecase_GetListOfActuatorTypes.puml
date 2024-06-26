@@ -1,0 +1,146 @@
+@startuml
+title <size: 30> Use Case: Get List of Actuator Types v6.0\n Development view level 5- class diagram
+note "<b>Only methods related to\n<b>Get List of Actuator Types are represented" as N1
+skinparam linetype ortho
+
+
+
+class GetListOfActuatorTypesCTRL {
+    -actuatorTypeService : ActuatorTypeService
+
+    +GetListOfActuatorTypesCTRL(actuatorTypeService)
+    +getListOfActuatorTypes() : List<ActuatorTypeDTO>
+}
+
+class ActuatorTypeCtrlWeb{
+    - actuatorTypeService : ActuatorTypeService
+
+    + ActuatorTypeCtrlWeb(actuatorTypeService : ActuatorTypeService)
+    + getActuatorTypes() : ResponseEntity<CollectionModel<ActuatorTypeDTO>>
+}
+
+class ActuatorTypeMapper{
+    - ERRORMESSAGE : String
+
+    +domainToDTO(actuatorTypeList : List<ActuatorType>) : List<ActuatorTypeDTO>
+}
+
+class ActuatorTypeServiceImpl{
+    -actuatorTypeRepository : ActuatorTypeRepository
+    -actuatorTypeFactory : ActuatorTypeFactory
+    - filepath : String
+
+    +ActuatorTypeService(actuatorTypeRepository : ActuatorTypeRepository, actuatorTypeFactory : ActuatorTypeFactory)
+    +getListOfActuatorTypes() : List<ActuatorType>
+    -populateRepository() : void
+    -actuatorTypeReadingAndConversion() : List<String>
+}
+
+class ActuatorTypeRepositoryMem{
+    -actuatorTypes : Map<ActuatorTypeIDVO, ActuatorType>
+
+    +findAll() : Iterable<ActuatorType>
+}
+
+class ActuatorTypeRepositoryJPA{
+    -actuatorTypeFactory : ActuatorTypeFactory
+    -entityManagerFactory : EntityManagerFactory
+
+    +findAll() : Iterable<ActuatorType>
+}
+
+
+class ActuatorTypeDTO{
+    -actuatorTypeID : String
+
+}
+
+interface ActuatorTypeService{
+
+    +getListOfActuatorTypes(): List<ActuatorType>
+}
+
+interface ActuatorTypeRepository{
+}
+
+interface Repository{
+    + findAll() : Iterable<T>
+
+}
+
+class ActuatorTypeAssembler{
+    +actuatorTypeToDomain(actuatorTypeFactory : ActuatorTypeFactory,\n actuatorTypeDataModel : ActuatorTypeDataModel) : ActuatorType
+    +actuatorTypeListToDomain(actuatorTypeFactory : ActuatorTypeFactory,\n actuatorTypeDataModelList : List<ActuatorTypeDataModel>) : Iterable<ActuatorType>
+}
+
+class ActuatorTypeDataModel{
+    -actuatorTypeID : String
+
+    +ActuatorTypeDataModel(actuatorType : ActuatorType)
+}
+
+class ActuatorTypeFactoryImpl{
+    +createActuatorType(actuatorTypeIDVO : ActuatorTypeIDVO) : ActuatorType
+}
+
+class ActuatorType{
+    -actuatorTypeIDVO : ActuatorTypeIDVO
+
+    +getID() : ActuatorTypeIDVO
+}
+
+interface AggregateRoot{
+    +getID() : DomainID
+}
+
+interface ActuatorTypeFactory{
+    +createActuatorType(actuatorTypeIDVO : ActuatorTypeIDVO) : ActuatorType
+}
+
+class ActuatorTypeRepositorySpringData {
+    -actuatorTypeFactory : ActuatorTypeFactory
+    -iActuatorTypeRepositorySpringData : IActuatorTypeRepositorySpringData
+
+    +findAll() : Iterable<ActuatorType>
+}
+
+interface IActuatorTypeRepositorySpringData {
+}
+
+
+GetListOfActuatorTypesCTRL ..> ActuatorTypeService
+ActuatorTypeCtrlWeb ..> ActuatorTypeService
+
+ActuatorTypeService <|.. ActuatorTypeServiceImpl
+
+GetListOfActuatorTypesCTRL ..> ActuatorTypeMapper
+ActuatorTypeCtrlWeb ..> ActuatorTypeMapper
+
+ActuatorTypeMapper .up.> ActuatorTypeDTO : creates >
+
+ActuatorTypeServiceImpl ..> ActuatorTypeRepository
+
+ActuatorTypeRepository -left-|> Repository
+
+ActuatorTypeRepositoryMem .left.|> ActuatorTypeRepository
+ActuatorTypeRepositoryJPA .up.|> ActuatorTypeRepository
+ActuatorTypeRepositorySpringData .up.|> ActuatorTypeRepository
+
+ActuatorTypeRepositorySpringData .right.> IActuatorTypeRepositorySpringData
+
+ActuatorTypeRepositorySpringData ..> ActuatorTypeAssembler
+ActuatorTypeRepositoryJPA ..> ActuatorTypeAssembler
+ActuatorTypeFactory .right.> ActuatorTypeAssembler
+
+ActuatorTypeFactoryImpl ..|> ActuatorTypeFactory
+ActuatorTypeFactoryImpl .up.> ActuatorType : creates >
+
+ActuatorTypeRepositorySpringData ..> ActuatorTypeDataModel
+ActuatorTypeRepositoryJPA ..> ActuatorTypeDataModel
+ActuatorTypeAssembler .right.> ActuatorTypeDataModel
+
+ActuatorType .up.|> AggregateRoot
+
+
+
+@enduml

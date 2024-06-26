@@ -1,0 +1,27 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title Use Case - List Devices Grouped By Functionality \nProcess View Level 2 \nSuccess Scenario
+autonumber
+
+participant "**<<container (C4)>>**\nBackend" as BE
+
+!pragma teoz true
+box "  <<System>>\n:SmartHome" #DarkGrey
+
+
+participant "**<<container (C4)>>**\nBackend" as BE
+
+[o-> BE: GET /devices/byfunctionality
+activate BE
+
+note right
+**This feature is not available in the Web App.**
+end note
+[o<-- BE : functionalities data + HTTP Status
+deactivate BE
+
+end box
+
+
+@enduml

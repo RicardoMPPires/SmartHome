@@ -1,0 +1,264 @@
+@startuml
+
+title <size: 30> Use Case: Add Device v6.0\n Development view level 5- class diagram
+
+note "<b>Only methods related to 'add device to \n<b>room' use case are represented" as N1
+
+skinparam linetype ortho
+
+class DeviceCTRLWeb{
+    -deviceService: DeviceService
+    +DeviceCTRLWeb(deviceService: DeviceService)
+    +addDeviceToRoom(deviceDTO: DeviceDTO): ResponseEntity<DeviceDTO>
+}
+
+class AddDeviceToRoomCtrl{
+    - deviceService : DeviceService
+
+    + AddDeviceToRoomCtrl(deviceService : DeviceService)
+    + addDeviceToRoom(roomDTO : RoomDTO, deviceDTO : DeviceDTO) : boolean
+}
+
+interface RoomRepository{
+}
+
+class RoomRepositoryMem {
+    -data: LinkedHashMap<RoomIDVO, Room>
+    +isPresent(roomID: RoomIDVO): boolean
+}
+
+class RoomRepositorySpringData {
+    -roomFactory: RoomFactory
+    -iRoomRepositorySpringData: IRoomRepositorySpringData
+    +isPresent(roomIDVO: RoomIDVO): boolean
+}
+class RoomRepositoryJPA {
+    -roomFactory: RoomFactory
+    -iRoomRepositorySpringData: IRoomRepositorySpringData
+    +isPresent(roomIDVO: RoomIDVO): boolean
+}
+
+class RoomRepositoryJPA {
+    -roomFactory: RoomFactory
+    -entityManagerFactory: EntityManagerFactory
+    +isPresent(roomIDVO: RoomIDVO): boolean
+}
+
+class RoomMapper{
+    + createRoomIDVO(roomDTO : RoomDTO) : RoomIDVO
+}
+
+
+class RoomDTO{
+    - roomID : String
+    - roomName : String
+    - floor : int
+    - roomWidth : double
+    - roomLength : double
+    - roomHeight : double
+    + RoomDTO(roomName : String, floor : int, roomWidth : double, \nroomLength : double, roomHeight : double)
+    + getRoomID() : String
+}
+
+interface DeviceService {
+    +addDevice(deviceNameVO: deviceNameVO, deviceModelVO: DeviceModelVO, \nroomIDVO: RoomIDVO): Optional<Device>
+}
+
+class DeviceServiceImpl {
+    -roomRepository: RoomRepository
+    -deviceFactory: DeviceFactory
+    -deviceRepository: DeviceRepository
+    -sensorRepository: SensorRepository
+    -actuatorRepository: ActuatorRepository
+    +DeviceServiceImpl(deviceFactory: DeviceFactory, roomRepository: RoomRepository, deviceRepository: DeviceRepository)
+    +addDevice(deviceNameVO: DeviceNameVO, deviceModelVO: DeviceModelVO, roomIDVO: RoomIDVO): Optional<Device>
+}
+
+interface DeviceFactory {
+    +createDevice(deviceNameVO: deviceNameVO, deviceModelVO: DeviceModelVO, \nroomIDVO: RoomIDVO): Device
+}
+
+class DeviceFactoryImpl {
+    +createDevice(deviceNameVO: deviceNameVO, deviceModelVO: DeviceModelVO, \nroomIDVO: RoomIDVO): Device
+}
+
+class RoomIDVO {
+    - identifier : UUID
+    + RoomID(identifier : UUID)
+}
+
+class DeviceMapper{
+    + createDeviceNameVO(deviceDTO : DeviceDTO) : DeviceNameVO
+    + createDeviceModelVO(deviceDTO : DeviceDTO) : DeviceModelVO
+}
+
+class DeviceDTO{
+    - deviceID : String
+    - deviceName : String
+    - deviceModel : String
+    - deviceStatus : String
+    - roomID : String
+
+    + DeviceDTO(deviceName : String, deviceModel : String)
+    + getDeviceName() : String
+    + getDeviceModel() : String
+}
+
+class DeviceIDVO {
+    -DeviceID: UUID
+    +DeviceIDVO(deviceID : UUID)
+}
+
+class DeviceNameVO {
+    -deviceName: String
+    +DeviceNameVO(deviceName: String)
+}
+
+class DeviceModelVO {
+    -strDeviceModel: String
+    +DeviceModelVO(strDeviceModel: String)
+}
+
+class DeviceStatusVO {
+    -deviceStatus: boolean
+    +DeviceStatusVO(deviceStatus: boolean)
+}
+
+
+class Device {
+    -deviceIDVO: DeviceIDVO
+    -deviceNameVO: DeviceNameVO
+    -deviceModelVO: DeviceModelVO
+    -deviceStatusVO: DeviceStatusVO
+    -roomIDVO: RoomIDVO
+
+    +Device(deviceName: DeviceNameVO, deviceModel: DeviceModelVO, roomID: RoomIDVO)
+}
+
+class DeviceRepositoryMem {
+     - data : LinkedHashMap<DeviceIDVO, Device>
+     + save(device : Device) : boolean
+     - validateEntity(entity : Device) : boolean
+}
+
+class DeviceRepositoryJPA {
+    - deviceFactory : DeviceFactory
+    - entityManagerFactory : EntityManagerFactory
+    + save (device : Device) : boolean
+}
+
+class DeviceRepositorySpringData {
+    - deviceFactory : DeviceFactory
+    - iDeviceRepositorySpringData : IDeviceRepositorySpringData
+    + DeviceRepositorySpringData(deviceFactory : DeviceFactory,iDeviceRepositorySpringData : IDeviceRepositorySpringData)
+    + save(device : Device) : boolean
+    - isNull (object : Object) : boolean
+}
+
+
+class DeviceDataModel {
+    -deviceID: String
+    -deviceName: String
+    -deviceModel: String
+    -deviceStatus: String
+    -roomIDVO: RoomIDVO
+    +DeviceDataModel (device: Device)
+}
+
+class RoomDataModel {
+    -roomID: String
+    -roomName: String
+    -roomFloor: int
+    -roomHeight: double
+    -roomLength: double
+    -roomWidth: double
+    -houseID: String
+    +RoomDataModel (room: Room)
+}
+
+interface DeviceRepository {
+}
+
+interface ActuatorRepository{
+}
+
+interface SensorRepository{
+}
+
+interface IRoomRepositorySpringData{
+ }
+
+interface IDeviceRepositorySpringData{
+   }
+
+interface Repository<T> {
+    + save(entity : T) : boolean
+    + isPresent(ID : DomainID) : boolean
+}
+
+
+interface DomainID {
+   + getID() : String
+}
+
+
+interface AggregateRoot {
+    + getID() : DomainID
+}
+
+interface ValueObject{
+    +getValue(): T
+    }
+
+
+DeviceCTRLWeb ..> RoomMapper
+DeviceCTRLWeb ..> DeviceMapper
+DeviceService <.. DeviceCTRLWeb
+DeviceService <.. AddDeviceToRoomCtrl
+DeviceServiceImpl ..|> DeviceService
+DeviceMapper .> DeviceDTO
+RoomMapper ..> RoomDTO
+RoomDTO -- RoomIDVO : <create>
+DeviceFactoryImpl .|> DeviceFactory
+DeviceDTO -- DeviceNameVO : <create>
+DeviceDTO -- DeviceModelVO : <create>
+DeviceFactoryImpl -- Device : <create>
+Device "*" o-- "1" RoomIDVO
+Device "1" o-- "1" DeviceNameVO
+Device "1" o-- "1" DeviceModelVO
+Device "1" *-- "1" DeviceIDVO
+Device "1" *-- "1" DeviceStatusVO
+Device ...|> AggregateRoot
+DeviceNameVO ..|> ValueObject
+DeviceModelVO ..|> ValueObject
+DeviceStatusVO ..|> ValueObject
+RoomIDVO ..|> DomainID
+DeviceIDVO ..|> DomainID
+DeviceServiceImpl ..> RoomRepository
+DeviceServiceImpl ..> DeviceRepository
+DeviceServiceImpl ..> SensorRepository
+DeviceServiceImpl ..> ActuatorRepository
+RoomRepositoryMem ..|> RoomRepository
+RoomRepositoryJPA ..|> RoomRepository
+RoomRepositorySpringData ..|> RoomRepository
+RoomRepositorySpringData .|> IRoomRepositorySpringData
+DeviceRepositoryMem ..|> DeviceRepository
+DeviceRepositoryJPA ..|> DeviceRepository
+DeviceRepositorySpringData ..|> DeviceRepository
+DeviceRepositorySpringData .|> IDeviceRepositorySpringData
+SensorRepositoryMem ..|> SensorRepository
+SensorRepositoryJPA ..|> SensorRepository
+SensorRepositorySpringData ..|> SensorRepository
+ActuatorRepositoryMem ..|> ActuatorRepository
+ActuatorRepositoryJPA ..|> ActuatorRepository
+ActuatorRepositorySpringData ..|> ActuatorRepository
+DeviceRepositoryJPA -- "*"DeviceDataModel : create >
+DeviceRepositorySpringData -- "*"DeviceDataModel : create >
+RoomRepositoryJPA -- "*"RoomDataModel : create >
+RoomRepositorySpringData -- "*"RoomDataModel : create >
+DeviceRepository --|> Repository
+ActuatorRepository --|> Repository
+RoomRepository --|> Repository
+SensorRepository --|> Repository
+
+@enduml

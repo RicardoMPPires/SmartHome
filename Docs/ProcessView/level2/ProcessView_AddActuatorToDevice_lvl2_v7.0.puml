@@ -1,0 +1,25 @@
+@startuml
+
+title Use Case - Add an Actuator to Device\nProcess View Level 2\n Success Scenario
+autonumber
+
+!pragma teoz true
+box "  <<System>>\n:SmartHome" #DarkGrey
+
+participant "**<<container (C4)>>**\n:Frontend" as FE
+participant "**<<container (C4)>>**\n:Backend" as BE
+
+[o-> FE : Add a new actuator to this device
+activate FE
+[o<-- FE : Request actuator data
+|||
+[o-> FE : Provide actuator data
+FE -> BE : POST /actuators (actuator information)
+activate BE
+BE --> FE : new actuator data + HTTP Status
+deactivate BE
+[o<-- FE : Actuator added!
+deactivate FE
+end box
+
+@enduml

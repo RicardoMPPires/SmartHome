@@ -1,0 +1,90 @@
+@startuml
+autonumber
+title Use Case GetMaximumTemperatureDifference v6.0 - Main Success Scenario
+
+participant ":Router" as R
+participant ":LogCTRLWeb" as C
+participant ":TimeConfigMapper" as TCA
+participant "initialTimeStamp:TimeStampVO" as TSVinit
+participant "finalTimeStamp:TimeStampVO" as TSVfinal
+participant "deltaVO:DeltaVO" as delta
+participant ":DeviceMapper" as DM
+participant "inDeviceIdVO:DeviceIDVO" as DIV
+participant "outDeviceIdVO:DeviceIDVO" as DOV
+participant ":LogService" as LS
+participant ":LogRepository" as LR
+
+
+[o-> R : GET /logs?outdoorDevId={outdoorDevId}&indoorDevId={indoorDevId}
+activate R
+R-> C : getMaxInstantaneousTemperature(outdoorDevId, indoorDevId, timeConfigDTO)
+activate C
+
+C -> TCA : createInitialTimeStamp(timeConfigDTO)
+activate TCA
+TCA ->  TSVinit** : create(initialDate,initialTime)
+TCA -> C : **initialTimeStamp**
+deactivate TCA
+
+C -> TCA : createFinalTimeStamp(timeConfigDTO)
+activate TCA
+TCA -> TSVfinal** : create(finalDate,finalTime)
+TCA -> C : **finalTimeStamp**
+deactivate TCA
+
+C -> TCA : createDeltaVO(timeConfigDTO)
+activate TCA
+TCA -> delta** : create(delta)
+TCA -> C : **deltaVO**
+deactivate TCA
+
+
+C -> DM  : createDeviceID(indoorDevId)
+activate DM
+DM -> DIV** : create(indoorDevId)
+DM -> C : **inDeviceIdVO**
+deactivate DM
+
+C -> DM  : createDeviceID(outdoorDevId)
+activate DM
+DM -> DOV** : create(outdoorDevId)
+DM -> C : **outDeviceIdVO**
+deactivate DM
+
+C -> LS : getMaxInstantaneousTempDifference(outDeviceIDVO, inDeviceIDVO, initialTimeStamp, finalTimeStamp, deltaVO)
+activate LS
+
+LS -> LS : isIndoorDevice(inDeviceIDVO)
+activate LS
+deactivate LS
+
+LS -> LS : isOutdoorDevice(outDeviceIDVO)
+activate LS
+deactivate LS
+
+LS -> LS : validateTimeStamps(initialTimeStamp, finalTimeStamp)
+activate LS
+deactivate LS
+
+LS -> LR : getDeviceTemperatureLogs(outDeviceIDVO, "TemperatureSensor", initialTimeStamp, finalTimeStamp)
+activate LR
+LR -> LS : **outdoorDeviceLogList**
+deactivate LR
+
+LS -> LR : getDeviceTemperatureLogs(inDeviceIDVO, "TemperatureSensor", initialTimeStamp, finalTimeStamp)
+activate LR
+LR -> LS : **indoorDeviceLogList**
+deactivate LR
+
+LS -> LS : maxInstantTemperatureDiff = getMaxInstantaneousTemperatureDifference(outdoorDeviceLogList,indoorDeviceLogList,deltaVO)
+activate LS
+deactivate LS
+
+LS -> C : **maxInstantTemperatureDiff**
+deactivate LS
+C --> R : **maxInstantTemperatureDiff,HttpStatus.OK**
+deactivate C
+[o<-- R : **maxInstantTemperatureDiffJSON,HttpStatus.OK**
+deactivate R
+
+@enduml

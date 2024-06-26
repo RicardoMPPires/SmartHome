@@ -1,0 +1,43 @@
+@startuml
+
+title <size:30> Use Case - Get List of Actuator Types v6.0 - Main Success Scenario
+autonumber
+
+
+participant ":Router" as R
+participant ":ActuatorTypeCTRLWeb" as C
+participant ":ActuatorTypeService" as ATS
+participant ":ActuatorTypeRepository" as ATR
+participant ":ActuatorTypeMapper" as ATM
+
+
+[o-> R : GET /actuatortypes
+activate R
+
+R -> C : getListOfActuatorTypes()
+activate C
+
+C -> ATS : getListOfActuatorTypes()
+activate ATS
+ATS -> ATR : findAll()
+activate ATR
+ATR --> ATS : **actuatorTypeList**
+deactivate ATR
+ATS --> C : **actuatorTypeList**
+deactivate ATS
+C -> ATM : domainToDTO(ActuatorTypeList)
+activate ATM
+
+loop for each Actuator type in Actuator type list
+ATM -> ATM : domainToDTO(actuatorType)
+activate ATM
+deactivate ATM
+end loop
+ATM --> C : **actuatorTypeDTOList**
+deactivate ATM
+
+C --> R : **actuatorTypeDTOList, HttpStatus.OK**
+deactivate C
+[o<-- R : **actuatorTypeListJSON, HttpStatus.OK**
+deactivate R
+@enduml

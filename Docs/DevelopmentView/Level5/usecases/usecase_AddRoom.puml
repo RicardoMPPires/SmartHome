@@ -1,0 +1,204 @@
+@startuml
+
+title <size: 30> Use Case: Add Room v6.0\n Development view level 5- class diagram
+note "<b>Only methods related to the\n<b>Use Case are represented" as N1
+skinparam linetype ortho
+
+interface Repository <T> {
+    + save(entity : T) : boolean
+}
+
+interface HouseRepository {
+    + getFirstHouseIDVO() : HouseIDVO;
+}
+
+interface RoomRepository {
+}
+
+interface RoomService{
+    + addRoom (roomName : RoomNameVO, roomFloor : RoomFloorVO, \nroomDimensions : RoomDimensionsVO) : boolean
+    + findAll() : List<Room>
+}
+
+interface AggregateRoot{
+    + getID() : DomainID
+}
+
+class RoomMapper {
+    + createRoomNameVO(roomDTO : RoomDTO) : RoomNameVO
+    + createRoomFloorVO(roomDTO : RoomDTO) : RoomFloorVO
+    + createRoomDimensionsVO(roomDTO : RoomsDTO) : RoomDimensionsVO
+}
+
+class RoomDTO{
+    - roomID : String
+    - roomName : String
+    - floor : int
+    - roomWidth : double
+    - roomLength : double
+    - roomHeight : double
+    + RoomDTO(roomName : String, floor : int, roomWidth : double, \nroomLength : double, roomHeight : double)
+
+}
+
+class RoomCTRLWeb {
+    -roomService: RoomService
+
+    +RoomCTRLWeb(roomService: RoomService)
+    +addRoom(roomDTO: RoomDTO) : ResponseEntity<RoomDTO>
+}
+
+class AddRoomCtrl {
+    - roomService : RoomService
+
+    + AddRoomCtrl(roomService : RoomService)
+    + addRoom(roomDTO : RoomDTO) : boolean
+    }
+
+class RoomServiceImpl {
+    - roomRepository : RoomRepository;
+    - roomFactory : RoomFactory;
+    - houseRepository : HouseRepository;
+    + addRoom (roomName : RoomNameVO, roomFloor : RoomFloorVO, \nroomDimensions : RoomDimensionsVO) : boolean
+}
+
+class Room {
+    - houseID: HouseIDVO
+    - roomName: RoomNameVO
+    - room ID: RoomIDVO
+    - roomFloor : RoomFloorVO
+    - dimensions : RoomDimensionsVO
+}
+
+class RoomDimensionsVO{
+     - width : RoomWidthVO
+     - length : RoomLengthVO
+     - height : RoomHeightVO
+}
+
+class RoomWidthVO{
+     - roomWidth : double
+}
+
+class RoomLengthVO{
+     - length : double
+}
+
+class RoomHeightVO{
+     - height : double
+}
+
+class RoomIDVO{
+     - roomID : int
+}
+
+class RoomNameVO{
+     - roomName : String
+}
+
+class RoomFloorVO{
+     - roomFloor : int
+}
+
+class HouseIDVO{
+     - houseID : int
+}
+class HouseRepositoryMem{
+    -data: LinkedHashMap<HouseIDVO, House>
+    +getFirstHouseIDVO(): HouseIDVO
+}
+
+class RoomFactoryImpl{
+    + createRoom (roomName : RoomNameVO, roomFloor : RoomFloorVO, \nroomDimensions : RoomDimensionsVO, houseID : House IDVO) : Room
+}
+
+interface RoomFactory {
+    + createRoom (roomName : RoomNameVO, roomFloor : RoomFloorVO, \nroomDimensions : RoomDimensionsVO, houseID : House IDVO) : Room
+}
+class RoomRepositoryMem{
+    - data : LinkedHashMap<RoomIDVO, Room>
+    + save(room : Room ) : boolean
+}
+
+class HouseRepositoryJPA {
+    -houseFactory: HouseFactory
+    -entityManagerFactory: EntityManagerFactory
+    +getFirstHouseIDVO(): HouseIDVO
+}
+
+class RoomRepositoryJPA {
+    -roomFactory: RoomFactory
+    -entityManagerFactory: EntityManagerFactory
+    +save(room: Room): boolean
+}
+
+class RoomDataModel {
+- roomID : String
+- roomName : String
+- roomFloor : int
+- roomLength : double
+- roomWidth : double
+- roomHeight : double
+- houseID : String
+}
+
+class HouseRepositorySpringData {
+    -houseFactory: HouseFactory
+    -iHouseRepositorySpringData: IHouseRepositorySpringData
+    +getFirstHouseIDVO(): HouseIDVO
+}
+
+interface IHouseRepositorySpringData{
+ }
+
+class RoomRepositorySpringData {
+    - roomRepository : IRoomRepositorySpringData
+    - roomFactory : RoomFactory
+    + RoomRepositorySpringData(roomRepository : IRoomRepositorySpringData,\n roomFactory : RoomFactory)
+    + save(room : Room) : boolean
+    + findAll() : Iterable<Room>
+    + findById(roomIDVO : RoomIDVO) : Room
+    + isPresent(roomIDVO : RoomIDVO) : boolean
+}
+
+interface IRoomRepositorySpringData{
+ }
+
+RoomCTRLWeb ..> RoomMapper
+RoomCTRLWeb ..> RoomService
+AddRoomCtrl ..> RoomService
+RoomServiceImpl ..> RoomFactory
+RoomServiceImpl ..> HouseRepository
+RoomServiceImpl ..> RoomRepository
+RoomFactoryImpl ..> Room
+RoomFactoryImpl ..|> RoomFactory
+RoomServiceImpl ..|> RoomService
+HouseRepositoryMem .|> HouseRepository
+RoomRepository <|. RoomRepositoryMem
+HouseRepository --|> Repository
+RoomRepository --|> Repository
+HouseRepository <|.. HouseRepositoryJPA
+RoomRepository <|.. RoomRepositoryJPA
+RoomRepositoryJPA -- RoomDataModel : create >
+HouseRepository <|.. HouseRepositorySpringData
+HouseRepositorySpringData .|> IHouseRepositorySpringData
+RoomRepository <|.- RoomRepositorySpringData
+RoomRepositorySpringData .|> IRoomRepositorySpringData
+RoomRepositorySpringData -- RoomDataModel : create >
+RoomMapper ..> RoomDTO
+RoomMapper -- RoomNameVO : creates >
+RoomMapper -- RoomFloorVO : creates >
+RoomMapper -- RoomDimensionsVO : creates >
+
+' Aggregation relationships
+Room "1" *-- "1" RoomNameVO
+Room "1" *-- "1" RoomIDVO
+Room "1" *-- "1" RoomFloorVO
+Room "1" *-- "1" RoomDimensionsVO
+Room "*" *-- "1" HouseIDVO
+Room ..|> AggregateRoot
+RoomDimensionsVO "1" *-- "1" RoomLengthVO
+RoomDimensionsVO "1" *-- "1" RoomWidthVO
+RoomDimensionsVO "1" *-- "1" RoomHeightVO
+
+@enduml

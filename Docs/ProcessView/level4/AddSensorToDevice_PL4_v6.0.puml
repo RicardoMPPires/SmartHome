@@ -1,0 +1,79 @@
+@startuml
+title <size:30> Use Case - Add Sensor to Device v6.0 - Main Success Scenario
+autonumber
+
+participant ":Router" as R
+participant ":SensorCTRLWeb" as C
+
+participant ":SensorMapper" as SM
+participant "sensorNameVO:SensorNameVO" as SN
+participant "sensorTypeIdVO:SensorTypeVO" as ST
+participant "deviceIDVO:DeviceIDVO" as DevID
+participant ":SensorService" as SS
+participant ":SensorTypeRepository" as STR
+participant ":DeviceRepository" as DR
+participant ":Device" as D
+participant ":SensorFactory" as SF
+participant ":SensorRepository" as SR
+participant "sensor : Sensor" as S
+
+
+
+[o-> R : POST /sensors
+activate R
+R-> C : addSensorToDevice(sensorDTO)
+activate C
+C -> SM : createSensorNameVO(sensorDTO)
+activate SM
+SM -> SN** : create(sensorDTO)
+SM --> C : **sensorNameVO**
+deactivate SM
+
+C -> SM : createSensorTypeIDVO(sensorDTO)
+activate SM
+SM -> ST** : create(sensorDTO)
+SM --> C : **sensorTypeIdVO**
+deactivate SM
+
+C -> SM : createDeviceIDVO(sensorDTO)
+activate SM
+SM -> ST** : create(sensorDTO)
+SM --> C : **deviceIDVO**
+deactivate SM
+
+C -> SS : addSensor(sensorNameVO, deviceIDVO, sensorTypeIDVO)
+activate SS
+SS -> STR : isPresent(sensorTypeIDVO)
+activate STR
+STR --> SS : **true**
+deactivate STR
+SS -> DR : findById(deviceIDVO)
+activate DR
+DR --> SS : **device**
+deactivate DR
+SS -> D : isActive()
+activate D
+D --> SS : true
+deactivate D
+SS -> SF : createSensor(sensorNameVO, deviceIDVO, sensorTypeIDVO)
+activate SF
+SF -> S** : create(sensorNameVO, deviceIDVO, sensorTypeIDVO)
+SF --> SS : **sensor**
+deactivate SF
+SS -> SR : save(sensor)
+activate SR
+SR --> SS : true
+deactivate SR
+SS --> C : **sensor**
+deactivate SS
+
+C -> SM : domainToDTO(sensor)
+activate SM
+SM --> C : **sensorDTO**
+deactivate SM
+C --> R : **sensorDTO, HttpStatus.CREATED**
+deactivate C
+[o<-- R : **sensorJSON, HttpStatus.CREATED**
+deactivate R
+
+@enduml

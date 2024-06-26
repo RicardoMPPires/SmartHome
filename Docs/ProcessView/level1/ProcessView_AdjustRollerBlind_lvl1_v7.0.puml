@@ -1,0 +1,21 @@
+@startuml
+
+title Use Case - Adjust Roller Blind Position \nProcess View Level 1\n Success Scenario
+autonumber
+
+actor "Power User/\nAdministrator" as A
+participant "**<<system (C4)>>**\nSmartHome" as SH
+
+
+A -> SH : I want to adjust this roller blind to this position
+activate A
+activate SH
+SH ->o] : Adjust roller blind
+note right: **The interaction with physical **\n**devices is just an abstraction.**
+
+SH <--o]: Send validation
+SH --> A : The roller blind was adjusted
+deactivate SH
+deactivate A
+
+@enduml

@@ -1,0 +1,45 @@
+@startuml
+autonumber
+title Get Room By ID - Main Success Scenario - V6.0
+
+participant ": Router" as RT
+participant ": RoomCTRLWeb" as C
+participant ": RoomMapper" as RM
+participant "roomIDVO:RoomIDVO" as RID
+participant ": RoomService" as RS
+participant ": RoomRepository" as RR
+
+[o-> RT : GET /rooms/{roomID}
+activate RT
+RT-> C : getRoomById(roomID)
+activate C
+
+C -> RM : createRoomIDVO(roomID)
+activate RM
+RM -> RID** : create(roomID)
+RM --> C : **roomIDVO**
+deactivate RM
+
+C -> RS : getRoomById(roomIDVO)
+activate RS
+
+RS -> RR : isPresent(roomIDVO)
+activate RR
+RR --> RS : **true**
+deactivate RR
+RS -> RR : findByID(roomIDVO)
+activate RR
+RR --> RS : **room**
+deactivate RR
+RS --> C : **room**
+deactivate RS
+
+C -> RM : domainToDTO(room)
+activate RM
+RM --> C : **roomDTO**
+deactivate RM
+C --> RT : **roomDTO, HttpStatus.OK**
+deactivate C
+[o<-- RT : **roomJSON, HttpStatus.OK**
+deactivate RT
+@enduml

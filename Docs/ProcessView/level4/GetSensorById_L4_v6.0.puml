@@ -1,0 +1,50 @@
+@startuml
+title <size:30> Use Case - Get Sensor by ID v6.0 - Main Success Scenario
+autonumber
+
+participant ":Router" as R
+participant ":SensorCTRLWeb" as C
+
+participant ":SensorMapper" as SM
+participant "sensorIdVO:SensorIdVO" as SID
+participant ":SensorService" as SS
+participant ":SensorRepository" as SR
+participant "sensor:Sensor" as S
+
+[o-> R : GET /sensors/{sensorId}
+activate R
+
+R -> C : getSensorByID(sensorId)
+activate C
+
+C -> SM : createSensorID(sensorId)
+activate SM
+SM -> SID** : create(sensorId)
+SM --> C : **sensorID**
+deactivate SM
+
+C -> SS : getSensorByID(sensorID)
+activate SS
+
+SS -> SR : isPresent(sensorTypeIDVO)
+activate SR
+SR --> SS : **true**
+deactivate SR
+
+SS -> SR : findSensorByID(deviceIDVO)
+activate SR
+SR --> SS : **sensor**
+deactivate SR
+SS --> C : **sensor**
+deactivate SS
+
+C -> SM : domainToDTO(sensor)
+activate SM
+SM --> C : **sensorDTO**
+deactivate SM
+C --> R : **sensorDTO, HttpStatus.OK**
+deactivate C
+[o<-- R : **sensorJSON, HttpStatus.OK**
+deactivate R
+
+@enduml

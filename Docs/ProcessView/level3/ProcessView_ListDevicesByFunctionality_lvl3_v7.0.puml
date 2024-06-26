@@ -1,0 +1,39 @@
+@startuml
+<style>
+    title {
+      HorizontalAlignment center
+      FontSize 18
+      padding 20
+    }
+</style>
+
+title Use Case - List Devices Grouped By Functionality \nProcess View Level 3 - Backend Interaction \n Main Success Scenario
+autonumber
+
+!pragma teoz true
+
+box "<<container (C4)>>\n     :Backend" #LightGrey
+  participant "**<<component (C4)>>**\n:Server" as SERVER
+  participant "**<<component (C4)>>**\n:Database" as DB
+end box
+
+[o-> SERVER : GET /devices/byfunctionality
+activate SERVER
+
+SERVER -> DB: Find all sensors
+activate DB
+DB --> SERVER: Retrieve sensor list
+deactivate DB
+|||
+SERVER -> DB: Find all actuators
+activate DB
+DB --> SERVER: Retrieve actuator list
+deactivate DB
+|||
+SERVER -> SERVER : Group devices \nby functionality
+
+
+[o<-- SERVER : functionalities data + HTTP Status
+deactivate SERVER
+
+@enduml

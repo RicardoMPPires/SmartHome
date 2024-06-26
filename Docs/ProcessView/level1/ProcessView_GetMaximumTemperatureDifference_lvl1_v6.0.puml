@@ -1,0 +1,20 @@
+@startuml
+
+title Use Case - Get Maximum Temperature Difference Between an Outdoor \nand Indoor Device in a Given Period \nProcess View Level 1\nSuccess Scenario
+autonumber
+
+actor "Administrator/\nRoom Owner/\nPower User" as A
+participant "**<<system (C4)>>**\nSmartHome" as SH
+
+A -> SH : I want to get the maximum instantaneous temperature \ndifference between an outdoor and indoor devices
+activate A
+activate SH
+SH --> A : Request indoor and outdoor devices, time period and delta
+deactivate SH
+A -> SH : Provide indoor and outdoor devices, time period and delta
+activate SH
+SH --> A : Provide the maximum instantaneous temperature difference
+deactivate SH
+deactivate A
+
+@enduml

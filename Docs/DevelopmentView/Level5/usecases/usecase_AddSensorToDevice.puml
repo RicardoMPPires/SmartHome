@@ -1,0 +1,245 @@
+@startuml
+
+title <size: 30> Use Case: Add Sensor To Device v6.0\n Development view level 5- class diagram
+note "<b>Only methods related to\n<b>'add sensor to device' use case are represented" as N1
+skinparam linetype ortho
+
+
+       SensorCTRLWeb ..> SensorMapper
+       SensorCTRLWeb ..> SensorService
+       AddSensorToDeviceCtrl ..> SensorService
+         AddSensorToDeviceCtrl ..> SensorMapper
+       SensorServiceImpl ..|> SensorService
+       SensorServiceImpl ..> SensorFactory
+       SensorFactoryImpl ..|> SensorFactory
+       SensorServiceImpl .up.> SensorTypeRepository
+       SensorServiceImpl .up.> SensorRepository
+       SensorServiceImpl .up.> DeviceRepository
+       SensorFactoryImpl -down- Sensor : creates >
+       SensorMapper ..> SensorDTO
+       SensorMapper -- SensorNameVO : creates >
+       SensorMapper -- DeviceIDVO : creates >
+       SensorMapper -- SensorTypeIDVO : creates >
+       DeviceRepository --|> Repository
+       SensorRepository --|> Repository
+       SensorTypeRepository --|> Repository
+       DeviceRepositoryMem ..|> DeviceRepository
+       DeviceRepositorySpringData ..|> DeviceRepository
+       DeviceRepositoryJPA ..|> DeviceRepository
+       SensorTypeRepositoryMem ..|> SensorTypeRepository
+       SensorTypeRepositoryJPA ..|> SensorTypeRepository
+       SensorTypeRepositorySpringData ..|> SensorTypeRepository
+       SensorNameVO ..|> ValueObject
+       DeviceIDVO ..|> DomainID
+       SensorTypeIDVO ..|> DomainID
+       SensorRepositoryMem ..|> SensorRepository
+       SensorRepositoryJPA ..|> SensorRepository
+       SensorRepositorySpringData ..|> SensorRepository
+       SensorRepositoryJPA -up- SensorDataModel : creates >
+       SensorRepositorySpringData -up- SensorDataModel : creates >
+       SensorRepositorySpringData .up.> ISensorRepositorySpringData
+       DeviceRepositorySpringData .up.> IDeviceRepositorySpringData
+       SensorTypeRepositorySpringData .up.> ISensorTypeRepositorySpringData
+       Sensor --|> AggregateRoot
+       Sensor <|.. AveragePowerConsumptionSensor
+       Sensor <|.. EnergyConsumptionSensor
+       Sensor <|.. HumiditySensor
+       Sensor <|.. PositionSensor
+       Sensor <|.. PowerConsumptionSensor
+       Sensor <|.. DewPointSensor
+       Sensor <|.. SolarIrradianceSensor
+       Sensor <|.. SunsetSensor
+       Sensor <|.. SunriseSensor
+       Sensor <|.. SwitchSensor
+       Sensor <|.. TemperatureSensor
+       Sensor <|.. WindSensor
+
+
+    class SensorCTRLWeb{
+        -sensorService: SensorService
+        +SensorCTRLWEb(sensorService: SensorService)
+        +addSensorToDevice(sensorDTO: SensorDTO): ResponseEntity<SensorDTO>
+    }
+
+    class AddSensorToDeviceCtrl{
+    - sensorService : SensorService
+
+    + AddSensorToDeviceCtrl(sensorService : SensorService)
+    + addSensorToDevice(deviceDTO : DeviceDTO, sensorTypeDTO : SensorTypeDTO, sensorDTO : SensorDTO) : boolean
+    }
+
+    interface SensorService{
+
+    }
+
+    class SensorServiceImpl{
+            -sensorRepository: SensorRepository
+            -sensorFactory: SensorFactory
+            -deviceRepository: DeviceRepository
+            -sensorTypeRepository: SensorTypeRepository
+            +SensorServiceImpl(deviceRepository: DeviceRepository, sensorRepository: SensorRepository, sensorTypeRepository:SensorTypeRepository, sensorFactory Sensorfactory)
+            +addSensor(sensorNameVO: SensorNameVO, deviceIDVO DeviceIDVO, sensorTypeIDVO SensorTypeIDVO): Optional<Sensor>
+    }
+
+    class SensorRepositoryMem{
+            -sensorMap : Map<SensorIDVO, Sensor>
+            +save(sensor : Sensor): boolean
+    }
+
+    class SensorRepositoryJPA{
+        -sensorFactory: SensorFactory
+        -entityManagerFactory: EntityManagerFactory
+        +SensorRepositoryJPA(sensorFactory, entityManagerFactory)
+        +save(sensor : Sensor): boolean
+    }
+
+    interface SensorFactory{
+        +createSensor(sensorName: SensorNameVO, deviceID: DeviceIDVO, sensorTypeID: SensorTypeID)
+    }
+
+     class SensorFactoryImpl{
+            -configuration: Configuration
+            +SensorFactoryImpl(filePath: String)
+     }
+
+     class SensorMapper{
+             +createSensorNameVO(sensorDTO: SensorDTO): SensorNameVO
+             +createDeviceID(sensorDTO: SensorDTO): DeviceIDVO
+             +createSensorTypeIDVO(sensorDTO: SensorDTO): SensorTypeIDVO
+     }
+
+    interface Sensor{
+    +getSensorTypeID() : SensorTypeIDVO
+    +getDeviceID() : DeviceIDVO
+    +getSensorName() : SensorNameVO
+    }
+
+    class AveragePowerConsumptionSensor{
+        +getID(): SensorIDVO
+        }
+
+    class DewPointSensor{
+        +getID(): SensorIDVO
+    }
+
+    class EnergyConsumptionSensor {
+        +getID() : SensorIDVO
+    }
+
+    class HumiditySensor{
+        +getID() : SensorIDVO
+    }
+    class PositionSensor{
+        +getID() : SensorIDVO
+        }
+
+    class PowerConsumptionSensor{
+        +getID() : SensorIDVO
+    }
+
+    class SolarIrradianceSensor {
+        +getID() : SensorIDVO
+    }
+
+    class SunriseSensor{
+        +getID() : SensorIDVO
+    }
+    class SunsetSensor{
+        +getID() : SensorIDVO
+        }
+
+    class SwitchSensor{
+        +getID() : SensorIDVO
+    }
+
+    class TemperatureSensor {
+        +getID() : SensorIDVO
+    }
+
+    class WindSensor{
+        +getID() : SensorIDVO
+    }
+
+
+    class SensorDTO{
+        -sensorName: String
+        -sensorID: String
+        -deviceID: String
+        -sensorTypeID: String
+        +getSensorName(): String
+    }
+
+    class SensorNameVO{
+        -sensorName: String
+        +SensorNameVO(sensorName)
+    }
+
+    class SensorTypeIDVO{
+        -sensorTypeID: String
+        +SensorTypeIDVO(sensorTypeID)
+    }
+
+    class DeviceIDVO{
+        -deviceID: UUID
+        +DeviceIDVO(deviceID)
+    }
+    class SensorRepositorySpringData{
+        -iSensorRepositorySpringData : ISensorRepositorySpringData
+        -sensorFactory : SensorFactory
+        +SensorRepositorySpringData(sensorFactory, iSensorRepositorySpringData)
+        +save(sensor : Sensor) : boolean
+    }
+    class SensorDataModel{
+        -id : String
+        -name : String
+        -sensorTypeID : String
+        -deviceID : String
+        +SensorDataModel(sensor : Sensor)
+    }
+
+    interface DeviceRepository{}
+
+    interface SensorRepository{}
+
+    interface SensorTypeRepository{}
+
+    interface Repository{
+        + findAll() : List<T>
+        + findByID(id : ID) : T
+        + isPresent(id : ID) : boolean
+        + save(ent : T) : boolean
+    }
+
+    interface SensorService{
+    +addSensor(sensorNameVO, deviceIDVO, sensorTypeIDVO): boolean
+    }
+
+    interface SensorFactory{
+        +createSensor(sensorNameVO, deviceIDVO, sensorTypeIDVO): Sensor
+    }
+
+
+    interface Sensor{
+
+    }
+
+    interface ValueObject{
+        +getValue(): T
+    }
+
+    interface DomainID{
+        +getID(): String
+    }
+
+    interface ISensorRepositorySpringData{}
+
+    interface IDeviceRepositorySpringData{}
+
+    interface ISensorTypeRepositorySpringData{}
+
+    interface AggregateRoot{
+        + getID(): DomainID
+    }
+
+
+@enduml

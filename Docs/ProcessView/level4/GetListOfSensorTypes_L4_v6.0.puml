@@ -1,0 +1,43 @@
+@startuml
+
+title <size:30> Use Case - Get List of Sensor Types v6.0 - Main Success Scenario
+autonumber
+
+
+participant ":Router" as R
+participant ":SensorTypeCTRLWeb" as C
+participant ":SensorTypeService" as STS
+participant ":SensorTypeRepository" as STR
+participant ":SensorTypeMapper" as STM
+
+
+[o-> R : GET /sensortypes
+activate R
+
+R -> C : getListOfSensorTypes()
+activate C
+
+C -> STS : getListOfSensorTypes()
+activate STS
+STS -> STR : findAll()
+activate STR
+STR --> STS : **sensorTypeList**
+deactivate STR
+STS --> C : **sensorTypeList**
+deactivate STS
+C -> STM : domainToDTO(sensorTypeList)
+activate STM
+
+loop for each sensor type in sensor type list
+STM -> STM : domainToDTO(sensorType)
+activate STM
+deactivate STM
+end loop
+STM --> C : **sensorTypeDTOList**
+deactivate STM
+
+C --> R : **sensorTypeDTOList, HttpStatus.OK**
+deactivate C
+[o<-- R : **sensorTypeListJSON, HttpStatus.OK**
+deactivate R
+@enduml

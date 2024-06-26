@@ -1,0 +1,36 @@
+@startuml
+
+autonumber
+
+title Use Case - Get House - v6.0 - Main Success Scenario
+
+participant ":Router" as R
+participant ":HouseCTRLWeb" as C
+participant ":HouseService" as HS
+participant ":HouseRepository" as HR
+participant ":HouseMapper" as HM
+participant "houseDTO:HouseDTO" as HDTO
+
+[o-> R : GET /house
+activate R
+R -> C  : getHouse()
+activate C
+C -> HS : getFirstHouse()
+activate HS
+HS -> HR : getFirstHouse()
+activate HR
+HR --> HS : **house**
+deactivate HR
+HS --> C : **house**
+deactivate HS
+
+C -> HM : domainToDto(house)
+activate HM
+HM -> HDTO** : create(house)
+HM --> C : **houseDTO**
+deactivate HM
+C --> R : **houseDTO, HttpStatus.OK**
+deactivate C
+[o<-- R : **houseJSON, HttpStatus.OK**
+deactivate R
+@enduml

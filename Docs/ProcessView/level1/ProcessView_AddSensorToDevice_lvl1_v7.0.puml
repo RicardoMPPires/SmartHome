@@ -1,0 +1,20 @@
+@startuml
+
+title Use Case - Add a Sensor to Device\nProcess View Level 1 \nSuccess Scenario
+autonumber
+
+actor "Power User/\nAdministrator" as A
+participant "**<<system (C4)>>**\nSmartHome" as SH
+
+A -> SH : I want to add a sensor to this device
+activate A
+activate SH
+SH --> A : Request sensor data
+deactivate SH
+A -> SH : Provides sensor data
+activate SH
+SH --> A : The sensor was added
+deactivate SH
+deactivate A
+
+@enduml

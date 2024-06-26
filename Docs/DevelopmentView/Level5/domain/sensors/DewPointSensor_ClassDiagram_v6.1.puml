@@ -1,0 +1,88 @@
+@startuml
+title <size: 30> Dew Point Sensor v6.1\n<size: 25>Development view level 5 - class diagram
+
+note "<b>Only methods related to Average Power \n<b>Consumption Sensor are represented" as 1
+
+skinparam linetype ortho
+
+interface Sensor {
+    + getSensorTypeID() : SensorTypeIDVO
+    + getDeviceID() : DeviceIDVO
+}
+
+interface AggregateRoot {
+    + getID() : DomainID
+}
+
+interface DomainID {
+    + getID() : String
+}
+
+interface ValueObject<T> {
+    + getValue() : T
+}
+
+class DewPointSensor{
+    + DewPointSensor(sensorName : SensorNameVO, deviceID : DeviceIDVO, sensorTypeID : SensorTypeIDVO)
+    + getReading(simHardware : SimHardware) : simValue<DewPointValue>
+    + getSensorName() : SensorNameVO
+    + getSensorTypeID() : SensorTypeIDVO
+    + getDeviceID() : DeviceIDVO
+    + getID() : SensorIDVO
+    - areParamsNull(params... : Object) : boolean
+}
+
+class SimHardware{
+    +getValue() : String
+}
+
+class DewPointValue {
+    + DewPointValue(dewPointValue : String)
+    + getValue() : dewPointValue
+    - isReadingValid(dewPointValue : String) : boolean
+}
+
+class SensorNameVO {
+    - sensorName : String
+    + SensorNameVO(sensorName : String)
+    + getValue() : String
+}
+
+class SensorIDVO {
+    - identifier : UUID
+    + SensorIDVO(identifier : UUID)
+    + getID() : String
+}
+
+class SensorTypeIDVO {
+    - sensorTypeID : String
+    + SensorTypeIDVO(sensorTypeID : String)
+    + getID() : String
+}
+
+class DeviceIDVO {
+    - deviceID : UUID
+    + DeviceIDVO(identifier : UUID)
+    + getID() : String
+}
+
+interface SensorExternalServices {
++ getValue(initialDate : String, finalDate : String) : String
+}
+
+DewPointSensor o---down SensorIDVO
+DewPointSensor o--- SensorTypeIDVO : <<has>>
+DewPointSensor o--- DeviceIDVO : <<has>>
+DewPointSensor o--- SensorNameVO : <<has>>
+SensorIDVO ..|> DomainID
+SensorTypeIDVO -down..|> DomainID
+DeviceIDVO -down..|> DomainID
+SensorNameVO -left..|> ValueObject
+DewPointValue -up..|> ValueObject
+DewPointSensor -left..> DewPointValue : <<creates>>
+DewPointSensor -right..> SimHardware : <<uses>>
+DewPointSensor -up..|> Sensor
+Sensor -right--|>AggregateRoot
+SimHardware -up.|> SensorExternalServices
+
+@enduml

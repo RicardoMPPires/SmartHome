@@ -1,0 +1,89 @@
+@startuml
+title <size: 30> Switch Sensor v6.1\n<size: 25>Development view level 5 - class diagram
+
+note "<b>Only methods related to \n<b>HumiditySensor are represented" as 1
+
+skinparam linetype ortho
+
+interface Sensor {
+    + getSensorTypeID() : SensorTypeIDVO;
+    + getDeviceID() : DeviceIDVO;
+    + getSensorName() : SensorNameVO;
+}
+
+
+interface ValueObject<T> {
+    + getValue() : T
+}
+
+class SensorNameVO{
+    - sensorName : String
+    + getValue() : String
+}
+
+class DeviceIDVO{
+    - deviceID : UUID
+    + getID() : String
+}
+
+class SensorTypeIDVO{
+    - sensorTypeID : String
+    + getID() : String
+}
+
+class SensorIDVO{
+    - identifier : UUID
+    + getValue() : String
+}
+
+
+class SwitchSensor{
+    - sensorName : SensorNameVO
+    - deviceID : DeviceIDVO
+    - sensorType : SensorTypeIDVO
+    - sensorID : SensorIDVO
+
+    + getReading(simHardware : SimHardware) : ValueObject<Integer>
+}
+
+class SwitchValue{
+    - switchValue : String
+
+    + getValue() : String
+    - isReadingValid(switchValue : String) : boolean
+}
+
+class SimHardware{
+    + getValue() : String
+}
+
+interface SensorExternalServices {
++getValue() : String
+}
+
+interface AggregateRoot {
+    +getID() : DomainID
+}
+
+interface DomainID{
+}
+
+Sensor <|..left SwitchSensor
+SimHardware <.. SwitchSensor
+
+SensorNameVO --o SwitchSensor
+SensorExternalServices <|..down SimHardware
+SensorIDVO --o SwitchSensor
+SwitchValue <..right SwitchSensor
+SensorTypeIDVO --o SwitchSensor
+DeviceIDVO --o SwitchSensor
+
+ValueObject <|.. SensorNameVO
+DomainID  <|.. SensorIDVO
+DomainID  <|.. SensorTypeIDVO
+DomainID  <|.. DeviceIDVO
+
+ValueObject <|.. SwitchValue
+Sensor -up-|> AggregateRoot
+
+@enduml

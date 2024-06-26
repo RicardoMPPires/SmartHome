@@ -1,0 +1,50 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+title Logical View - Container (Level 2)
+
+component "SmartHome" <<component>> {
+portin " " as SystemRestAPIPort
+portin " " as SystemWebAPIPort
+portout " " as SystemWeatherServiceOutPort
+portout " " as SystemSmartDeviceOutPort
+
+    component "BackEnd" <<component>>{
+    portin " " as BERestAPIPort
+    portout " " as BESmartDeviceOutPort
+    }
+
+    component "FrontEnd" <<component>>{
+    portin " " as FEWebUiPort
+    portout " " as FERestAPIPort
+    portout " " as FEWsApiPort
+    }
+
+    component "Weather \nService" <<component>>{
+    portin " " as PortinternalWeatherServiceAPI
+    portout " " as outPortWeatherService
+    }
+
+interface "Internal \nWS API"
+interface "Internal \nBE Rest API"
+}
+
+BERestAPIPort -up- "Internal \nBE Rest API"
+"Internal \nBE Rest API" )- SystemRestAPIPort
+SystemRestAPIPort -u- "Rest \nAPI"
+FERestAPIPort --( "Internal \nBE Rest API"
+FEWebUiPort -- SystemWebAPIPort
+SystemWebAPIPort -u- "Web UI"
+
+FEWsApiPort --( "Internal \nWS API"
+PortinternalWeatherServiceAPI -- "Internal \nWS API"
+outPortWeatherService -- SystemWeatherServiceOutPort
+SystemWeatherServiceOutPort --( "External \nWeather \nService API"
+
+BESmartDeviceOutPort -down- SystemSmartDeviceOutPort
+SystemSmartDeviceOutPort --( "Smart \ndevice \nAPI"
+
+
+
+}
+@enduml

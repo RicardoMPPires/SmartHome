@@ -1,0 +1,59 @@
+@startuml
+
+autonumber
+
+title Use Case - Define House Location v6.0 - Main Success Scenario
+
+participant ":Router" as R
+participant ":HouseCTRLWeb" as C
+participant ":HouseMapper" as HM
+participant "address:AddressVO" as AddVO
+participant "gps:GpsVO" as GVO
+participant "locationVO:LocationVO" as Lvo
+participant ":LocationVO" as Lvo
+participant ":HouseService" as HS
+participant ":HouseRepository" as HR
+participant "house:House" as H
+
+[o-> R : PATCH /house
+activate R
+R -> C : configureLocation(LocationDTO)
+activate C
+C -> HM : dtoToDomain(locationDTO)
+activate HM
+HM -> AddVO** : create(locationDTO)
+HM -> GVO** : create(locationDTO)
+HM -> Lvo** : create(address,gps)
+HM --> C : **locationVO**
+deactivate HM
+C -> HS : updateLocation(locationVO)
+activate HS
+HS -> HR : getFirstHouse()
+activate HR
+HR --> HS : **house**
+deactivate HR
+HS -> H : configureLocation(locationVO)
+activate H
+H --> HS : **true**
+deactivate H
+HS -> HR : update(house)
+activate HR
+HR -> HR : update(house)
+activate HR
+deactivate HR
+HR --> HS : **true**
+deactivate HR
+HS --> C : **house**
+deactivate HS
+
+C -> HM : houseToDTO(house)
+activate HM
+HM --> C : **houseDTO**
+deactivate HM
+
+C --> R : **houseDTO, HttpStatus.OK**
+deactivate C
+[o<-- R : **houseJSON, HttpStatus.OK**
+
+deactivate R
+@enduml

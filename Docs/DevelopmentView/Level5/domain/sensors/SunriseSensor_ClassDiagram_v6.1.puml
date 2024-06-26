@@ -1,0 +1,95 @@
+@startuml
+title <size: 30> Sunrise Sensor v6.1\n<size: 25>Development view level 5 - class diagram
+
+skinparam linetype ortho
+
+interface Sensor {
+    + getSensorTypeID() : SensorTypeIDVO;
+    + getDeviceID() : DeviceIDVO;
+    + getSensorName() : SensorNameVO;
+}
+
+interface AggregateRoot {
+    + getID() : DomainID
+}
+
+interface DomainID {
+    + getID() : String
+}
+
+interface ValueObject<T> {
+    + getValue() : T
+}
+
+interface SunTimeServices {
+    + computeSunrise(date : String, gpsCoordinates : String) : ZonedDateTime;
+    }
+
+class SunriseSensor{
+    + SunriseSensor(sensorName : SensorNameVO, deviceID : DeviceIDVO, sensorTypeID : SensorTypeIDVO)
+    + getSunriseTime(date : String, gpsLocation : String, sunTimeCalculator : SunTimeCalculator) : Value<ZonedDateTime>
+    + getSensorName() : SensorNameVO
+    + getSensorTypeID() : SensorTypeIDVO
+    + getDeviceID() : DeviceIDVO
+    + getID() : SensorIDVO
+    - areParamsNull(params... : Object) : boolean
+}
+
+class SunTimeValue {
+    + SunTimeValue(sunTimeValue : ZonedDateTime)
+    + getValue() : ZonedDateTime
+}
+
+class SunTimeCalculator {
+    + computeSunriseTime(date : String, gpsCoordinates : String) : ZonedDateTime
+    - getSunTimes(date : String, gpsCoordinates : String) : SunTimes
+    - convertCoordinates(gpsCoordinates : String) : double[]
+    - parseLocalDate(dateAsString : String) : LocalDate
+    - convertToDate(localDate : LocalDate) : Date
+}
+
+class SensorNameVO {
+    - sensorName : String
+    + SensorNameVO(sensorName : String)
+    + getValue() : String
+}
+
+class SensorIDVO {
+    - identifier : UUID
+    + SensorIDVO(identifier : UUID)
+    + getID() : String
+}
+
+class SensorTypeIDVO {
+    - sensorTypeID : String
+    + SensorTypeIDVO(sensorTypeID : String)
+    + getID() : String
+}
+
+class DeviceIDVO {
+    - deviceID : UUID
+    + DeviceIDVO(identifier : UUID)
+    + getID() : String
+}
+
+
+
+AggregateRoot <|-- Sensor
+Sensor <|.. SunriseSensor
+SunTimeCalculator <.. SunriseSensor
+SunTimeServices <|.. SunTimeCalculator
+
+SensorNameVO --o SunriseSensor
+SensorIDVO --o SunriseSensor
+SunTimeValue <..right SunriseSensor
+SensorTypeIDVO --o SunriseSensor
+DeviceIDVO --o SunriseSensor
+
+ValueObject <|.. SensorNameVO
+DomainID <|.. SensorIDVO
+DomainID <|.. SensorTypeIDVO
+DomainID <|.. DeviceIDVO
+
+ValueObject <|.. SunTimeValue
+
+@enduml

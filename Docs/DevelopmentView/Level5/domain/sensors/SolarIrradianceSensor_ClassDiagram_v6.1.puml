@@ -1,0 +1,90 @@
+@startuml
+title <size: 30> Solar Irradiance Sensor v6.1\n<size: 25>Development view level 5 - class diagram
+
+note "<b>Only methods related to Solar \n<b>Irradiance Sensor are represented" as 1
+
+
+skinparam linetype ortho
+
+interface Sensor {
+    + getSensorTypeID() : SensorTypeIDVO
+    + getDeviceID() : DeviceIDVO
+    + getSensorName() : SensorNameVO
+}
+
+interface AggregateRoot {
+    + getID() : String
+}
+
+
+interface ValueObject<T> {
+    + getValue() : T
+}
+
+class SimHardware {
+}
+
+interface SensorExternalServices {
+    + getValue() : String
+}
+
+class SolarIrradianceSensor {
+    - sensorID : SensorIDVO
+    - sensorName : SensorNameVO
+    - sensorTypeID : SensorTypeIDVO
+    - deviceID : DeviceIDVO
+
+    + SolarIrradianceSensor(sensorName : SensorNameVO, deviceID : DeviceIDVO, sensorTypeID : SensorTypeIDVO)
+    + getReading(simHardware : SimHardware) : ValueObject<Integer>
+
+}
+
+class SensorNameVO {
+    - actuatorName : String
+    + SensorNameVO(sensorName : String)
+    + getValue() : String
+}
+
+class SensorIDVO {
+    - identifier : UUID
+    + SensorIDVO(identifier : UUID)
+}
+
+class SensorTypeIDVO {
+    - sensorTypeID : String
+    + SensorTypeIDVO(sensorTypeID : String)
+}
+
+class DeviceIDVO {
+    - deviceID : UUID
+    + DeviceIDVO(deviceID : UUID)
+}
+
+class SolarIrradianceValue {
+    - primitiveValue : int
+
+    + SolarIrradianceValue(reading : String)
+    + getValue() : Integer
+    - validReading(reading : String) : boolean
+}
+
+interface DomainID{
+    + getID() : String
+}
+
+AggregateRoot <|-down- Sensor
+ValueObject <|.. SolarIrradianceValue
+Sensor <|.. SolarIrradianceSensor
+SolarIrradianceSensor .right.> SolarIrradianceValue
+SolarIrradianceSensor .left.> SimHardware
+DomainID <|.. SensorIDVO
+DomainID <|.. SensorTypeIDVO
+DomainID <|.. DeviceIDVO
+ValueObject <|.up. SensorNameVO
+SensorNameVO "1" -left-o "1" SolarIrradianceSensor
+SensorIDVO "1" --o "1" SolarIrradianceSensor
+SensorTypeIDVO "1" --o "*" SolarIrradianceSensor
+DeviceIDVO "1" --o "*" SolarIrradianceSensor
+SensorExternalServices <|.. SimHardware
+
+@enduml

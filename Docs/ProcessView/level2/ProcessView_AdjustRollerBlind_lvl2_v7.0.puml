@@ -1,0 +1,28 @@
+@startuml
+
+title Use Case - Adjust Roller Blind Position\n Process View Level 2\n Success Scenario
+autonumber
+
+
+!pragma teoz true
+box "  <<System>>\n:SmartHome" #DarkGrey
+
+participant "**<<container (C4)>>**\n:Frontend" as FE
+participant "**<<container (C4)>>**\n:Backend" as BE
+
+[o-> FE : Adjust this roller blind to this position
+activate FE
+FE -> BE : PATCH /actuators/{actuatorId}/act (information)
+activate BE
+|||
+BE ->o]: Adjust roller blind
+note left: **The interaction with physical **\n**devices is just an abstraction.**
+BE <--o]: Send validation
+
+BE --> FE : new actuator data + HTTP Status
+deactivate BE
+[o<-- FE : Roller blind adjusted!
+deactivate FE
+end box
+
+@enduml

@@ -1,0 +1,96 @@
+@startuml
+title <size: 30> HumiditySensor v6.1\n<size: 25>Development view level 5 - class diagram
+
+note "<b>Only methods related to \n<b>HumiditySensor are represented" as 1
+
+skinparam linetype ortho
+
+interface Sensor {
+
+}
+
+interface SensorExternalServices{
+     + getValue() : String
+}
+
+interface DomainID{
+    + getID() : String
+}
+
+interface AggregateRoot{
+    +getID() : DomainID4
+}
+
+interface ValueObject<T> {
+    + getValue() : T
+}
+
+
+class HumiditySensor{
+    - sensorName : SensorNameVO
+    - deviceID : DeviceIDVO
+    - sensorTypeID : SensorTypeIDVO
+    - sensorID : SensorIDVO
+
+    + HumiditySensor(sensorName : SensorNameVO,deviceID : DeviceIDVO,sensorTypeID : SensorTypeIDVO)
+    + getReading(simHardware : SimHardware) : ValueObject<Integer>
+}
+
+class HumidityValue{
+    - primitiveValue : int
+
+    + HumidityValue(reading: String)
+    + getValue() : Integer
+}
+
+class SimHardware{
+}
+
+class SensorNameVO{
+    - sensorName : String
+    + SensorNameVO(sensorName : String)
+    + getValue() : String
+}
+
+class SensorIDVO{
+    - identifier : UUID
+    + SensorIDVO(identifier : UUID)
+}
+
+
+class SensorTypeIDVO{
+    - sensorTypeID : String
+    + SensorTypeIDVO(sensorTypeID : String)
+}
+
+class DeviceIDVO{
+    - deviceID : UUID
+    + DeviceIDVO(deviceID : UUID)
+}
+
+interface Sensor {
+    + getSensorTypeID() : SensorTypeIDVO
+    + getDeviceID() : DeviceIDVO
+    + getSensorName() : SensorNameVO
+}
+
+
+Sensor <|..left HumiditySensor
+SimHardware <.. HumiditySensor
+
+SensorNameVO --o HumiditySensor
+SensorExternalServices <|..down SimHardware
+SensorIDVO --o HumiditySensor
+HumidityValue <..right HumiditySensor
+SensorTypeIDVO --o HumiditySensor
+DeviceIDVO --o HumiditySensor
+
+ValueObject <|.. SensorNameVO
+DomainID  <|.. SensorIDVO
+DomainID  <|.. SensorTypeIDVO
+DomainID  <|.. DeviceIDVO
+
+ValueObject <|.. HumidityValue
+Sensor -up-|> AggregateRoot
+
+@enduml

@@ -1,0 +1,95 @@
+@startuml
+title <size: 30> Power Consumption Sensor v6.1\n<size: 25>Development view level 5 - class diagram
+
+skinparam linetype ortho
+
+note "<b>Only methods related to Power \n<b>Consumption Sensor are represented" as 1
+
+interface Sensor {
+    +getSensorTypeID() : SensorTypeIDVO
+    +getSensorName() : SensorNameVO
+    +getDeviceID() : DeviceIDVO
+}
+
+interface AggregateRoot {
+    + getID() : DomainID
+}
+
+interface DomainID{
+    + getID() : String
+}
+
+interface ValueObject<T> {
+    + getValue() : T
+}
+
+class PowerConsumptionSensor{
+    - sensorName : SensorNameVO
+    - sensorID : SensorIDVO
+    - sensorTypeID : SensorTypeIDVO
+    - deviceID : DeviceIDVO
+
+    + PowerConsumptionSensor(sensorName : SensorNameVO,deviceID : DeviceIDVO,sensorTypeID : SensorTypeIDVO)
+    + getPowerConsumption(simHardware : SimHardware) : ValueObject<Integer>
+}
+
+class PowerConsumptionValue{
+    - powerConsumption : int
+
+    + PowerConsumptionValue(powerConsumption : int)
+    + getValue() : Integer
+}
+
+class SimHardware{
+    + getValue(): String
+}
+
+class SensorNameVO{
+    - sensorName : String
+    + SensorNameVO(sensorName : String)
+    + getValue() : String
+}
+
+class SensorIDVO{
+    - identifier : UUID
+    + SensorIDVO(identifier : UUID)
+    + getID() : String
+}
+
+
+class SensorTypeIDVO{
+    - sensorTypeID : String
+    + SensorTypeIDVO(sensorTypeID : String)
+    + getID() : String
+}
+
+class DeviceIDVO{
+    - deviceID : UUID
+    + DeviceIDVO(deviceID : UUID)
+    + getID() : String
+}
+
+interface SensorExternalService{
+    + getValue() : String
+}
+
+
+Sensor --|> AggregateRoot
+Sensor <|..right PowerConsumptionSensor
+SimHardware <..up PowerConsumptionSensor
+SimHardware ..|> SensorExternalService
+
+SensorNameVO --o PowerConsumptionSensor
+SensorIDVO --o PowerConsumptionSensor
+PowerConsumptionValue <..left PowerConsumptionSensor
+SensorTypeIDVO --o PowerConsumptionSensor
+DeviceIDVO --o PowerConsumptionSensor
+
+ValueObject <|.. SensorNameVO
+DomainID  <|.. SensorIDVO
+DomainID  <|.. SensorTypeIDVO
+DomainID  <|.. DeviceIDVO
+
+ValueObject <|.. PowerConsumptionValue
+
+@enduml

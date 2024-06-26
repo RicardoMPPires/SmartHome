@@ -1,0 +1,73 @@
+@startuml
+
+skinparam actorStyle awesome
+left to right direction
+
+title  Use Case Diagram - v6.0
+
+actor "Administrator" as A
+actor "Power User" as PU
+actor "Room Owner" as RO
+
+
+package "Smart Home" {
+  usecase "To configure house location" as UC1
+  usecase "To add room to house" as UC2
+  usecase "To get list of rooms" as UC3
+  usecase "To add device to room" as UC5v2
+  usecase "To get list of devices" as UC6
+  usecase "To add sensor to device" as UC7
+  usecase "To deactivate device" as UC8
+  usecase "To get list of devices by functionality" as UC9
+  usecase " To add actuator to device" as UC12
+  usecase "To get all measurements of \na device, within a given period" as UC33
+  usecase "To get the maximum instantaneous\n temperature difference between a device\n indoors and the outside, within a given period" as UC34
+  usecase "To get the peak power consumption\n of the house in a given period" as UC36
+  usecase "To close a blind roller that is in a room" as UC37
+
+  UC5v2 ..> UC3: <includes>
+  UC7 ..> UC6: <includes>
+
+  UC8 ..> UC6: <includes>
+
+  UC6 ..> UC3: <includes>
+  UC12 ..> UC6: <includes>
+
+  UC33 ..> UC6: <includes>
+  UC34 ..> UC6: <includes>
+  UC37 ..> UC6: <includes>
+
+}
+
+A --> UC1
+A --> UC2
+A --> UC3
+A --> UC5v2
+A --> UC6
+A --> UC7
+A --> UC8
+A --> UC9
+A --> UC12
+A --> UC33
+A --> UC34
+A --> UC36
+A --> UC37
+
+PU --> UC5v2
+PU --> UC6
+PU --> UC7
+PU --> UC8
+PU --> UC9
+PU --> UC12
+PU --> UC33
+PU --> UC34
+PU --> UC36
+PU --> UC37
+
+RO --> UC6
+RO --> UC33
+RO --> UC34
+RO --> UC37
+
+@enduml
+

@@ -1,0 +1,42 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+title Logical View - Level 3
+
+interface "Rest API"
+interface "Smart \n DeviceAPI"
+component "BackEnd" <<component>> as BE{
+    portin " " as BErestPort
+    portin " " as BEsmartDevicePort
+
+
+    component "Database" <<component>>{
+        portin " " as DBoutport
+
+    }
+    interface "JPA API"
+
+    component "<<component>>\nServer"{
+        portin " " as SVRestAPI
+        portin " " as SVSmartDeviceOutPort
+        portout " " as SVDbOutPort
+    }
+
+BErestPort -up- "Rest API"
+BEsmartDevicePort -up-( "Smart \n DeviceAPI"
+
+SVDbOutPort --( "JPA API"
+DBoutport -left- "JPA API"
+
+SVRestAPI -- BErestPort
+SVSmartDeviceOutPort -- BEsmartDevicePort
+
+}
+
+
+
+
+
+
+@enduml
+

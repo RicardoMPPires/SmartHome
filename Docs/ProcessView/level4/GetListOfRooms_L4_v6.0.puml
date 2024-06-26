@@ -1,0 +1,37 @@
+@startuml
+autonumber
+title Get list of rooms - Main Success Scenario - V6.0
+participant ":Router" as RT
+participant ":RoomCTRLWeb" as C
+
+participant ":RoomService" as RS
+participant ":RoomRepository" as RR
+participant ":RoomMapper" as RM
+
+[o-> RT : GET /rooms
+activate RT
+RT-> C : getListOfRooms()
+activate C
+C -> RS : findAll()
+activate RS
+RS -> RR : findAll()
+activate RR
+RR --> RS : **roomList**
+deactivate RR
+RS --> C : **roomList**
+deactivate RS
+C -> RM : domainToDTO(roomList)
+
+loop for each room in room list
+activate RM
+RM -> RM : domainToDTO(room)
+activate RM
+deactivate RM
+end loop
+RM --> C : **roomDTOList**
+deactivate RM
+C --> RT : **roomDTOList, HttpStatus.OK**
+deactivate C
+[o<-- RT : **roomListJSON, HttpStatus.OK**
+deactivate RT
+@enduml

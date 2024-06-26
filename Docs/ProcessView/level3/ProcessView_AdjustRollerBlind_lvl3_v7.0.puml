@@ -1,0 +1,51 @@
+@startuml
+<style>
+    title {
+      HorizontalAlignment center
+      FontSize 18
+      padding 20
+    }
+</style>
+
+title Use Case - Adjust Roller Blind Position\nProcess View Level 3 - Backend Interaction \n Main Success Scenario
+autonumber
+
+!pragma teoz true
+
+box "<<container (C4)>>\n     :Backend" #LightGrey
+  participant "**<<component (C4)>>**\n:Server" as SERVER
+  participant "**<<component (C4)>>**\n:Database" as DB
+end box
+
+
+[o-> SERVER : PATCH /actuators/{actuatorId}/act (information)
+activate SERVER
+
+SERVER -> DB: Verify if actuator exists
+activate DB
+DB --> SERVER: Send validation
+deactivate DB
+|||
+SERVER -> DB: Get actuator by its ID
+activate DB
+DB --> SERVER: Retrieve actuator
+deactivate DB
+|||
+SERVER -> SERVER : Validate actuator type
+|||
+SERVER ->o]: Adjust roller blind
+note right: **The interaction with physical **\n**devices is just an abstraction.**
+
+SERVER <--o]: Send validation
+|||
+SERVER -> SERVER : Set new actuator position
+|||
+SERVER -> DB: Save actuator with updated position
+DB --> SERVER : Send validation
+
+
+
+[o<-- SERVER : new actuator data + HTTP Status
+deactivate SERVER
+
+@enduml

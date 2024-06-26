@@ -1,0 +1,21 @@
+@startuml
+
+title Use Case - Add a Room to the House\nProcess View Level 1\n Success Scenario
+
+autonumber
+
+actor "Administrator" as A
+participant "**<<system (C4)>>**\nSmartHome" as SH
+
+A -> SH : I want to add a room to the house
+activate A
+activate SH
+SH --> A : Request room data
+deactivate SH
+A -> SH : Provide room data
+activate SH
+SH --> A : The room was added
+deactivate SH
+deactivate A
+
+@enduml

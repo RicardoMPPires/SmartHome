@@ -1,0 +1,65 @@
+@startuml
+title Implementation View - Level 4 - Focus: BE/Server
+top to bottom direction
+
+package System{
+
+    package "Framework and Drivers Layer"{
+        package "Router"{
+        }
+        package "Persistence"{
+        }
+'        package "Weather Service Gateway"{
+ '       }
+'        package "Smart Device Gateway"{
+ '       }
+    }
+
+    package "Interface Adapters Layer"{
+            package "Controller"{
+            }
+            package "Repository"{
+            }
+  '          package "Weather Service Manager"{
+   '         }
+  '          package "Smart Device Manager"{
+   '         }
+        }
+
+    package "Application Business Rules Layer"{
+            package "Implementation Application Service"{
+            }
+            package "Interface Application Service"{
+            }
+        }
+
+    package "Enterprise Business Rules Layer"{
+            package "Aggregate"{
+            }
+            package "Interface Repository"{
+            }
+            package "Value Object"{
+            }
+     '       package "Interface Weather Service Manager"{
+     '       }
+     '       package "Interface Smart Device Manager"{
+     '       }
+
+        }
+
+    "Router" .-down.> "Controller"
+    "Controller" ..> "Interface Application Service"
+    "Interface Application Service" <|-down- "Implementation Application Service"
+    "Implementation Application Service" ---down> "Aggregate"
+    "Implementation Application Service" -> "Value Object"
+
+    "Persistence" <.. "Repository"
+    "Repository" ..|> "Interface Repository"
+
+ '   "Weather Service Gateway" <.. "Weather Service Manager"
+ '   "Weather Service Manager" ..|> "Interface Weather Service Manager"
+
+ '   "Smart Device Gateway" <.. "Smart Device Manager"
+ '   "Smart Device Manager" ..> "Interface Smart Device Manager"
+}
+@enduml

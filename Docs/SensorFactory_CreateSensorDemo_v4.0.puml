@@ -1,0 +1,23 @@
+@startuml
+
+autonumber
+
+title Sensor Factory - Create Sensor Demo
+
+participant ":SensorFactory" as F
+participant "sensorTypeIDVO:SensorTypeIDVO" as SID
+participant ":SunriseSensor" as S
+
+note right of F: Sensor Factory has an encapsulated configuration object \nwhich is dynamically filled during factory instantiation and \nwho posesses key-value pairs where the key is related to \nthe SensorTypeID (string) and the correspondent value points \ntowards the path where the class constructor is. The methods \nisTypePermitted() and getString() are interacting with this object.
+
+[o-> F : createSensor(SensorNameVO,DeviceIDVO,SensorTypeIDVO)
+activate F
+F -> F : !areParamsNull(SensorNameVO,DeviceIDVO,SensorTypeIDVO)
+F -> SID : id : getID()
+F -> F : isTypePermitted(id)
+F -> F : sensorTypePath : getString(id)
+F -> S** : sensor : (sensorNameVO,DeviceIDVO,SensorTypeIDVO) <create>
+[o<- F : sensor
+deactivate F
+
+@enduml

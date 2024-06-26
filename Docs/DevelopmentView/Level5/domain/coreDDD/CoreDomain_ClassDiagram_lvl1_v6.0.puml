@@ -1,0 +1,70 @@
+@startuml
+title Domain Class Diagram - Core Domain\nSystem / BackEnd / Domain\n(Implementation View Level 4 - 1st Granularity)
+
+skinparam linetype ortho
+
+class House {
+- houseID: HouseIDVO
+- locationVO: LocationVO
+}
+
+class Room {
+- roomID: RoomIDVO
+- roomName: RoomNameVO
+- floor: RoomFloorVO
+- roomDimensions: RoomDimensionsVO
+- houseID: HouseIDVO
+}
+
+class Device {
+- deviceName: DeviceNameVO
+- deviceModel: DeviceModelVO
+- roomID: RoomIDVO
+- deviceStatus: DeviceStatusVO
+- deviceID: DeviceIDVO
+}
+
+interface Sensor {
+- sensorID: SensorIDVO
+- sensorName: SensorNameVO
+- sensorTypeID: SensorTypeIDVO
+- deviceID: DeviceIDVO
+}
+
+interface Actuator {
+- actuatorID: ActuatorIDVO
+- actuatorName: ActuatorNameVO
+- actuatorTypeID: ActuatorTypeIDVO
+- deviceIDVO: DeviceIDVO
+- settings: SettingsVO
+}
+
+class SensorType {
+- sensorTypeID: SensorTypeIDVO
+- sensorUnit: UnitVO
+}
+
+class ActuatorType {
+- actuatorTypeIDVO: ActuatorTypeIDVO
+}
+
+class Log {
+- logID: LogIDVO
+- time: TimeStampVO
+- reading: SensorValueObject<?>
+- sensorID: SensorIDVO
+- deviceID: DeviceIDVO
+- sensorTypeID: SensorTypeIDVO
+}
+
+House "1" <--right "*" Room
+Room "1" <--right "*" Device
+Device "1" <--down "*" Sensor
+Device "1" <--right "*" Actuator
+Sensor "*" <--left "1" SensorType
+Actuator "*" <--down "1" ActuatorType
+Device "1" <--down "*" Log
+Sensor "1" <--down "*" Log
+SensorType "1" <--down "*" Log
+
+@enduml

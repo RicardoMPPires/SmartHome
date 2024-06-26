@@ -1,0 +1,127 @@
+@startuml
+title <size: 30> Use Case: Close Roller Blind v6.0\n Development view level 5 - class diagram
+
+note "<b>Only methods related to the \n 'close RollerBlind actuator' are represented" as N1
+ skinparam linetype ortho
+
+class ActuatorCTRLWeb{
+    -actuatorService : ActuatorService
+    +ActuatorCTRLWeb(actuatorService : ActuatorService)
+    +closeRollerBlind(actuatorId : String) : ResponseEntity<Void>
+}
+
+class ActuatorMapper{
+    -ERRORMESSAGE : String
+    +createActuatorIDVO(actuatorId : String) : ActuatorIDVO
+}
+
+interface Repository{
+    +isPresent(id : ID) : boolean
+    +findByID(id :ID) : T
+}
+
+class ActuatorRepositorySpringData{
+    +isPresent(id : ActuatorIDVO) : boolean
+    +findByID(id : ActuatorIDVO) : Actuator
+}
+
+class ActuatorAssembler{
+    +toDomain(actuatorFactory: ActuatorFactory, actuatorDataModel : ActuatorDataModel) : Actuator
+}
+
+interface ActuatorFactory{
+    +createActuator(actuatorIDVO : ActuatorIDVO, actuatorName : ActuatorNameVO, \n actuatorTypeID : ActuatorTypeIDVO, deviceID : DeviceIDVO, settings : Settings) : Actuator
+}
+
+interface Actuator{
+    +getActuatorTypeID() : ActuatorTypeIDVO
+}
+
+class ActuatorIDVO{
+    -identifier : UUID
+    +ActuatorIDVO(identifier : UUID)
+}
+
+class ActuatorTypeIDVO{
+    -identifier : UUID
+    +ActuatorTypeIDVO(identifier : UUID)
+    +getID() : String
+}
+
+class RollerBlindActuator{
+    -actuatorID : ActuatorIDVO
+    -actuatorTypeID : ActuatorTypeIDVO
+    -deviceIDVO : DeviceIDVO
+    -actuatorName : ActuatorNameVO
+    +RollerBlindActuator(actuatorName : ActuatorNameVO, actuatorTypeID : ActuatorTypeIDVO, deviceID : DeviceIDVO)
+    +executeCommand(simHardwareAct : ActuatorExternalService, position : int) : boolean
+}
+
+interface ActuatorExternalService{
+    +executeIntegerCommandSim(position : int) : boolean
+}
+
+interface ActuatorService{
+    +closeRollerBlind(actuatorIDVO : ActuatorIDVO) : boolean
+}
+
+class ActuatorServiceImpl{
+    -deviceRepository : DeviceRepository
+    -actuatorTypeRepository : ActuatorTypeRepository
+    -actuatorRepository : ActuatorRepository
+    -actuatorFactory : ActuatorFactory
+    -actuatorExternalService : ActuatorExternalService
+    +ActuatorServiceImpl(deviceRepository : DeviceRepository, actuatorTypeRepository : ActuatorTypeRepository,\n actuatorRepository : ActuatorRepository, actuatorFactory : ActuatorFactory, actuatorExternalService : ActuatorExternalService)
+    +closeRollerBlind(actuatorIDVO : ActuatorIDVO) : boolean
+}
+
+interface ActuatorRepository{}
+
+class ActuatorDataModel{
+    -actuatorID : String
+    -actuatorName : String
+    -actuatorTypeID : String
+    -deviceID : String
+    -lowerLimit : String
+    -upperLimit : String
+    -precision : String
+}
+
+class ActuatorFactoryImpl{
+    -configuration :Configuration
+    +createActuator(actuatorID : ActuatorIDVO, actuatorName : ActuatorNameVO, \n actuatorTypeID : ActuatorTypeIDVO, deviceID : DeviceIDVO, settings : Settings) : Actuator
+}
+
+class SimHardwareAct{
+    +executeIntegerCommandSim(position : int) : boolean
+}
+
+interface AggregateRoot{}
+
+interface IActuatorRepositorySpringData{}
+
+interface JpaRepository{}
+
+
+ActuatorCTRLWeb ..> ActuatorService
+ActuatorCTRLWeb ..> ActuatorMapper
+ActuatorMapper ..> ActuatorIDVO : create >
+ActuatorServiceImpl ..|> ActuatorService
+ActuatorServiceImpl ..> ActuatorRepository
+ActuatorRepository --|> Repository
+ActuatorRepositorySpringData ..|> ActuatorRepository
+ActuatorServiceImpl ..> Actuator
+ActuatorServiceImpl ..> RollerBlindActuator
+ActuatorRepositorySpringData ..> ActuatorDataModel : create >
+ActuatorRepositorySpringData ..> ActuatorAssembler
+ActuatorAssembler ..> ActuatorFactory
+Actuator ..> ActuatorTypeIDVO
+RollerBlindActuator ..> ActuatorExternalService
+ActuatorFactoryImpl ..|> ActuatorFactory
+ActuatorFactoryImpl ..up> Actuator : create >
+SimHardwareAct ..up|> ActuatorExternalService
+RollerBlindActuator ..|> Actuator
+RollerBlindActuator ..|> AggregateRoot
+ActuatorRepositorySpringData ..> IActuatorRepositorySpringData
+IActuatorRepositorySpringData --|> JpaRepository
+@enduml

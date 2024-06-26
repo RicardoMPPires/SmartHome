@@ -1,0 +1,18 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+title Logical View - Context (level 1)
+
+component "<<System>>\nSmartHome" as SmartHome {
+portin " " as PortRestAPI
+portin " " as PortWebAPI
+portout " " as outPortWeatherServiceAPI
+portout " " as outPortSmartDeviceAPI
+}
+
+  PortRestAPI -u- "Rest \nAPI"
+  outPortSmartDeviceAPI--( "Smart \nDevice \nAPI"
+  PortWebAPI -u- "Web \nUI"
+  outPortWeatherServiceAPI--( "Weather \nService \nAPI"
+
+@enduml

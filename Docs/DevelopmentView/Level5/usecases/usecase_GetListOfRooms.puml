@@ -1,0 +1,89 @@
+@startuml
+title <size: 30> Get List of Rooms v6.0\n Development view level 5- class diagram
+note  "<b>Only methods related to\n<b>US03 are represented" as N1
+skinparam linetype ortho
+
+class GetListOfRoomsCTRL{
+    - roomService : RoomService
+
+    + GetListOfRoomsCTRL(roomService : RoomService)
+    +getListOfRooms() : List<RoomDTO>
+}
+
+class RoomCTRLWeb{
+    - roomService : RoomService
+
+    + RoomCTRLWeb(roomService : RoomService)
+    +getListOfRooms() : ResponseEntity<CollectionModel<RoomDTO>>
+}
+
+class RoomMapper{
+        - ERRORMESSAGE : String
+
+        + convertRoomToDTO(room : Room) : RoomDTO
+        + domainToDTO(listOfRooms : List<Room>) : List<RoomDTO>
+    }
+
+class RoomRepositoryMem <<Repository>>{
+    - DATA : LinkedHashMap<RoomIDVO, Room>
+
+    + findAll() : Iterable<Room>
+}
+
+class RoomRepositoryJPA <<Repository>>{
+    - roomFactory : RoomFactory
+    - entityManagerFactory : EntityManagerFactory
+
+    + findAll() : Iterable<Room>
+}
+
+class RoomRepositorySpringData <<Repository>>{
+    - iRoomRepositorySpringData : IRoomRepositorySpringData
+    - roomFactory : RoomFactory
+
+
+    + findAll() : Iterable<Room>
+}
+
+class RoomServiceImpl  <<Service>>{
+    - houseRepository : HouseRepository
+    - roomRepository : RoomRepository
+    - roomFactory : RoomFactory
+
+
+    + findAll() : List<Room>
+}
+
+class RoomDTO{
+    - id : String
+    - roomName : String
+    - floor : int
+    - roomHeight : double
+    - roomLength : double
+    - roomWidth : double
+    - houseID : String
+}
+
+interface RoomRepository{
+}
+
+interface Repository{
+    + findAll() : Iterable<T>
+}
+
+interface RoomService{
+    + findAll() : List<Room>
+}
+
+GetListOfRoomsCTRL ..> RoomService
+RoomServiceImpl ..> RoomRepository
+GetListOfRoomsCTRL..> RoomMapper
+RoomCTRLWeb ..> RoomService
+RoomCTRLWeb ..> RoomMapper
+RoomMapper ..> RoomDTO
+RoomRepository  <|..up RoomRepositoryJPA
+RoomRepository <|..up RoomRepositorySpringData
+RoomRepository <|..up RoomRepositoryMem
+Repository <|--up RoomRepository
+RoomService <|..up RoomServiceImpl
+@enduml1

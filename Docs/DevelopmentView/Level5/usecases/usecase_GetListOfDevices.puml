@@ -1,0 +1,165 @@
+        @startuml
+        title <size: 30> Use Case: Get List of Devices v6.0\n Development view level 5- class diagram
+
+
+note "<b>Only methods related to the ´get list of devices' are represented" as N1
+ skinparam linetype ortho
+
+
+class DeviceCTRLWeb {
+     - deviceService : DeviceService
+
+     + DeviceCTRLWeb(deviceService : DeviceService)
+     + getDevicesByRoomId(id : String) : ResponseEntity<CollectionModel<DeviceDTO>>
+}
+
+class GetListOfDevicesCtrl {
+    - deviceService : DeviceService
+
+    + getListOfDevices(deviceDTO : DeviceDTO) : List<DeviceDTO>
+}
+
+class RoomMapper{
+     - ERRORMESSAGE : String
+
+     + createRoomIDVO(roomDTO : RoomDTO) : RoomIDVO
+}
+
+class RoomDTO{
+     - id : String
+     - roomName :String
+     - floor : int
+     - roomHeight : double
+     - roomWidth : double
+     - roomLength : double
+     - houseID : String
+}
+
+class RoomIDVO {
+     - identifier : UUID
+
+     + RoomIDVO(identifier : UUID)
+}
+
+class RoomRepositoryMem <<Repository>>{
+     - data : LinkedHashMap<RoomIDVO, Room>
+
+     + findByID(roomID : RoomIDVO) : Room
+}
+
+
+class DeviceServiceImpl <<Service>>{
+     - roomRepository : RoomRepository
+     - deviceFactory : DeviceFactory
+     - sensorRepository : SensorRepository
+     - actuatorRepository : ActuatorRepository
+     - deviceRepository : DeviceRepository
+     - NOT_PRESENT_MESSAGE : String
+
+     + DeviceServiceImpl(roomRepository : RoomRepository, deviceFactory : DeviceFactory,\n deviceRepository : DeviceRepository, sensorRepository : SensorRepository, actuatorRepository : ActuatorRepository)
+     + getListOfDevicesInARoom(roomIDVO : RoomIDVO) : List<Device>
+}
+
+class DeviceRepositoryMem <<Repository>>{
+     - data : LinkedHashMap<DeviceIDVO, Device>
+
+     + findByRoomID(roomID : RoomIDVO) : List<Device>
+}
+class DeviceRepositoryJPA {
+    - deviceFactory : DeviceFactory
+    - entityManagerFactory : EntityManagerFactory
+    - QUERY : String
+
+    + findByRoomID(roomID : RoomIDVO) : Iterable<Device>
+}
+
+interface IDeviceRepositorySpringData {
+    + findByRoomID(roomID : String) : Iterable<DeviceDataModel>
+
+}
+
+class DeviceRepositorySpringData {
+    - iDeviceRepositorySpringData : IDeviceRepositorySpringData
+    - deviceFactory : DeviceFactory
+
+    + DeviceRepositorySpringData(deviceFactory : DeviceFactory, iDeviceRepositorySpringData : IDeviceRepositorySpringData)
+    + findByRoomID (roomID : RoomIDVO) : Iterable<Device>
+
+}
+
+class DeviceDataModel {
+    - deviceID : String
+    - deviceName : String
+    - deviceModel : String
+    - deviceStatus : boolean
+    - roomID : String
+
+    + DeviceDataModel (device : Device)
+    + getDeviceID() : String
+    + getDeviceName() : String
+    + getDeviceModel() : String
+    + getDeviceStatus() : String
+    + getRoomID() : String
+
+}
+
+class DeviceAssembler {
+    + toDomain(deviceFactory : DeviceFactory, deviceDataModel : DeviceDataModel) : Device
+    + toDomainList(deviceFactory : DeviceFactory, deviceDataModelList : Iterable<DeviceDataModel>) : Iterable<Device>
+}
+
+class DeviceMapper {
+     - ERRORMESSAGE : String
+
+     + domainToDTO(deviceList : List<Device>) : List<DeviceDTO>
+     + domainToDTO(device : Device) : DeviceDTO
+}
+
+interface RoomRepository{
+}
+
+interface DeviceRepository{
+      + findByRoomId(roomID : RoomIDVO ) : Iterable<Device>
+}
+
+interface Repository{
+     + findByID(id : ID) : T
+}
+
+interface DeviceService{
+     + getListOfDevicesInARoom(roomIDVO : RoomIDVO) : List<Device>
+}
+
+interface DomainID{
+    + getID() : String
+}
+
+
+
+ DeviceCTRLWeb ..> RoomMapper
+ GetListOfDevicesCtrl ..> RoomMapper
+ RoomMapper ..> RoomDTO
+ RoomDTO ..> RoomIDVO
+
+ DeviceCTRLWeb ..> DeviceService
+ DeviceServiceImpl ..> DeviceRepositoryMem
+ DeviceServiceImpl ..> RoomRepositoryMem
+ DeviceServiceImpl ..|> DeviceService
+
+
+ DeviceCTRLWeb ..> DeviceMapper
+    GetListOfDevicesCtrl ..> DeviceMapper
+ GetListOfDevicesCtrl ..> DeviceService
+
+ DeviceRepository <|..up DeviceRepositoryMem
+ RoomRepository <|..up RoomRepositoryMem
+ Repository <|--up RoomRepository
+ Repository <|--up DeviceRepository
+ DeviceRepository <|.. DeviceRepositoryJPA
+ DeviceRepositorySpringData --.|> DeviceRepository
+ DeviceRepositorySpringData ..> IDeviceRepositorySpringData
+ DeviceRepositoryJPA ..> DeviceAssembler
+ DeviceRepositoryJPA -> DeviceDataModel : create >
+ DeviceRepositorySpringData -> DeviceDataModel : create >
+ RoomIDVO ..|> DomainID
+ @enduml

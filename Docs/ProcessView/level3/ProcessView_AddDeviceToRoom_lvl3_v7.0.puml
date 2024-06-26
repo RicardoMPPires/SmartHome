@@ -1,0 +1,37 @@
+@startuml
+<style>
+    title {
+      HorizontalAlignment center
+      FontSize 18
+      padding 20
+    }
+</style>
+
+title Use Case - Add Device to Room\nProcess View Level 3 - Backend Interaction \n Main Success Scenario
+autonumber
+
+!pragma teoz true
+
+box "<<container (C4)>>\n     :Backend" #LightGrey
+  participant "**<<component (C4)>>**\n:Server" as SERVER
+  participant "**<<component (C4)>>**\n:Database" as DB
+end box
+
+
+[o-> SERVER : POST /devices (device information)
+activate SERVER
+SERVER -> DB: Verify if room exists
+activate DB
+DB --> SERVER: Send validation
+deactivate DB
+|||
+SERVER -> SERVER : Create new device
+|||
+SERVER -> DB : Save device
+activate DB
+DB --> SERVER : Send validation
+deactivate DB
+[o<-- SERVER : new device data + HTTP Status
+
+
+@enduml

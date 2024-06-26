@@ -1,0 +1,111 @@
+@startuml
+
+    title Get Suntime: Main Success Scenario
+    autonumber
+participant ":Router" as R
+participant ":LogCTRLWeb" as C
+participant ":SensorMapper" as SM
+participant "sensorTypeIDVO:SensorTypeVO" as STIDVO
+participant ":LogService" as LS
+participant ":SensorRepository" as SR
+participant "sunSensor:SunSensor" as SS
+participant "sunCalc:SunTimeCalculator" as STC
+participant "sensorValueFct:SensorValueFactory" as SVF
+participant ":LogFactory" as LF
+participant ":LogRepository" as LR
+
+[o-> R : POST /logs/get-sun-reading?parameters=**params**
+note left of R
+  This request sends the following **params**:
+  - date
+  - latitude
+  - longitude
+  - sensorTypeID
+end note
+activate R
+
+R -> C : getSunReading(date,latitude,longitude,sensorTypeId)
+activate C
+
+C -> SM : createSensorTypeIDVO(**sensorTypeId**)
+activate SM
+SM -> STIDVO** : create(**sensorTypeId**)
+SM --> C : **sensorTypeIDVO**
+deactivate SM
+C -> C : **coordinates** = coordinatesAgglutination(latitude,longitude)
+activate C
+deactivate C
+C -> LS : getSunReading(date,**coordinates,sensorTypeIDVO**)
+activate LS
+LS -> LS : areParamsNull(date,**coordinates,sensorTypeIDVO**)
+activate LS
+deactivate LS
+LS -> LS : isSunSensorType(**sensorTypeIDVO**)
+activate LS
+deactivate LS
+
+LS -> SR : findBySensorTypeId(**sensorTypeIDVO**)
+activate SR
+SR --> LS : **sunSensorList**
+deactivate SR
+LS -> LS : isEmpty(**sunSensorList**)
+activate LS
+deactivate LS
+LS -> LS : **sunSensor** = getFirst(**sunSensorList**)
+activate LS
+deactivate LS
+
+LS -> LS : **sunCalc** = setSunCalculator()
+activate LS
+deactivate LS
+
+LS -> LS : **sensorValueFct** = setSensorValueFactory()
+activate LS
+deactivate LS
+LS -> SS : getReading(date,coordinates,**sunCalc**,**sensorValueFct**)
+activate SS
+SS -> STC : computeSunTime(date,coordinates)
+activate STC
+STC --> SS : **zoneDateTime**
+deactivate STC
+SS -> SVF :createSunTimeValue(**zoneDateTime**, sensorTypeID)
+activate SVF
+SVF --> SS : **reading**
+deactivate SVF
+SS --> LS  : **reading**
+deactivate SS
+
+LS -> SS : getSensorID()
+activate SS
+SS -> LS : **sensorID**
+deactivate SS
+
+LS -> SS : getDeviceID()
+activate SS
+SS -> LS : **deviceID**
+deactivate SS
+
+LS -> SS : getSensorTypeID()
+activate SS
+SS -> LS : **sensorTypeID**
+deactivate SS
+LS -> LF : createLog(**reading**,sensorID,deviceID,sensorTypeID)
+activate LF
+LF --> LS : **log**
+deactivate LF
+LS -> LR : save(**log**)
+activate LR
+LR --> LS : **true**
+deactivate LR
+
+LS -> LS : **readingStr** = getReadingAsString(**reading**)
+activate LS
+deactivate LS
+
+LS --> C : **readingStr**
+
+C --> R : **readingStr, HttpStatus.OK**
+deactivate C
+[o<-- R : **readingStr, HttpStatus.OK**
+deactivate R
+@enduml

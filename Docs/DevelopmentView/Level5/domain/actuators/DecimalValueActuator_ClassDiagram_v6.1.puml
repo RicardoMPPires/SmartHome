@@ -1,0 +1,103 @@
+@startuml
+title <size: 30> Decimal Value Actuator v6.1\n <size: 25>Development view level 5 - class diagram
+
+note "<b>Only methods related to Decimal \n<b>Value Actuator are represented" as 1
+
+skinparam linetype ortho
+
+interface Actuator {
+    + getActuatorTypeID() : ActuatorTypeIDVO
+    + getDeviceID() : DeviceIDVO
+    + getActuatorName() : ActuatorNameVO
+    + getLowerLimit() : String
+    + getUpperLimit() : String
+    + getPrecision() : String
+}
+
+interface ActuatorExternalService{
+    + executeDecimalCommand(value : double) : boolean
+}
+
+interface AggregateRoot {
+    + getID() : DomainID
+}
+
+interface DomainID {
+    + getID() : String
+}
+
+interface ValueObject<T> {
+    + getValue() : T
+}
+
+interface Settings {
+}
+
+class DecimalValueActuator {
+    - actuatorID : ActuatorIDVO
+    - actuatorName : ActuatorNameVO
+    - actuatorTypeID : ActuatorTypeIDVO
+    - deviceIDVO : DeviceIDVO
+    - decimalSettings : DecimalSettingsVO
+
+    + DecimalValueActuator(actuatorName : ActuatorNameVO, actuatorTypeID : ActuatorTypeIDVO,\n deviceID : DeviceIDVO, settings : Settings)
+    + DecimalValueActuator(actuatorId : ActuatorIDVO, actuatorName : ActuatorNameVO, actuatorTypeID : ActuatorTypeIDVO,\n deviceID : DeviceIDVO, settings : Settings)
+    + executeCommand(hardware : ActuatorExternalService, value : double) : String
+    - isValueWithinLimits(value : double) : boolean
+    - validValuePrecision(value : double, precision : double) : boolean
+    - countDecimalPlaces(double value) : int
+}
+
+
+class SimHardwareAct {
+
+}
+
+class ActuatorNameVO {
+    - actuatorName : String
+    + ActuatorNameVO(actuatorName : String)
+    + getValue() : String
+}
+
+class ActuatorIDVO {
+    - identifier : UUID
+    + ActuatorIDVO(identifier : UUID)
+}
+
+class ActuatorTypeIDVO {
+    - actuatorTypeID : String
+    + ActuatorTypeIDVO(actuatorTypeID : String)
+}
+
+class DeviceIDVO {
+    - deviceID : UUID
+    + DeviceIDVO(deviceID : UUID)
+}
+
+class DecimalSettingsVO {
+    - lowerLimit : double
+    - upperLimit : double
+    - precision : double
+
+    + DecimalSettingsVO(lowerLimit : String, upperLimit : String, precision : String)
+    + getValue() : Double[]
+    - validSettings(lowerLimit : double, upperLimit : double, precision : double) : boolean
+    - countDecimalPlaces(value : double) : int
+}
+
+ValueObject <|-- Settings
+AggregateRoot <|-- Actuator
+Actuator <|.left. DecimalValueActuator
+SimHardwareAct <.. DecimalValueActuator
+ActuatorExternalService <|.. SimHardwareAct
+ActuatorNameVO --o DecimalValueActuator
+ActuatorIDVO --o DecimalValueActuator
+ActuatorTypeIDVO --o DecimalValueActuator
+DeviceIDVO --o DecimalValueActuator
+DecimalSettingsVO --o DecimalValueActuator
+ValueObject <|... ActuatorNameVO
+Settings <|... DecimalSettingsVO
+DomainID <|.. ActuatorIDVO
+DomainID <|.. ActuatorTypeIDVO
+DomainID <|.. DeviceIDVO
+@enduml

@@ -1,0 +1,51 @@
+@startuml
+
+autonumber
+    title Use Case - Get Device by ID v6.0 - Main Success Scenario
+
+participant ":Router" as R
+participant ":DeviceCTRLWeb" as C
+participant ":DeviceMapper" as DM
+participant "deviceIDVO : DeviceIDVO" as DID
+participant ":DeviceService" as DS
+participant ":DeviceRepository" as DRM
+participant "device : Device" as D
+
+
+
+[o-> R : POST /devices/{id}
+
+activate R
+R -> C : getDeviceById(deviceId)
+activate C
+
+C -> DM : createDeviceID(deviceId)
+activate DM
+DM -> DID ** : create(deviceId)
+DM --> C : **deviceIDVO**
+deactivate DM
+
+C -> DS : findDeviceById(deviceIDVO)
+activate DS
+
+DS -> DRM : isPresent(deviceIDVO)
+activate DRM
+DRM --> DS : **true**
+deactivate DRM
+
+DS -> DRM : findDeviceById(deviceIDVO)
+activate DRM
+DRM --> DS : **device**
+deactivate DRM
+DS --> C : **device**
+deactivate DS
+
+C -> DM : domainToDTO(device)
+activate DM
+DM --> C : **deviceDTO**
+deactivate DM
+C --> R : **deviceDTO, HttpStatus.OK**
+deactivate C
+[o<-- R : **deviceJSON, HttpStatus.OK**
+deactivate R
+@enduml

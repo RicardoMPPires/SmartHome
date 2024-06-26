@@ -1,0 +1,223 @@
+@startuml
+title <size: 30> Use Case: Deactivate Device v6.0\n Development view level 5- class diagram
+note "<b>Only methods related to\n<b>use case Deactivate Device are represented" as N1
+skinparam linetype ortho
+
+class DeviceCTRLWeb {
+    - deviceService : DeviceService
+    + DeviceCTRLWeb(deviceService: DeviceService)
+    + deactivateDevice(device: DeviceDTO): ResponseEntity<DeviceDTO>
+}
+
+class DeactivateDeviceCtrl {
+    - deviceService : DeviceService
+
+    + DeactivateDeviceCtrl(deviceService: DeviceService)
+    + deactivateDevice(deviceDTO : DeviceDTO): boolean
+
+class DeviceMapper {
+    + createDeviceID(id: String): DeviceIDVO
+}
+
+class DeviceDTO{
+- String deviceID
+- String deviceName
+- String deviceModel
+- String deviceStatus
+- String roomID
+}
+
+interface DomainID{
+    + getID() : String
+}
+
+class DeviceIDVO {
+    - deviceID: UUID
+    + DeviceIDVO(UUID)
+}
+
+class DeviceRepositoryMem {
+     - data: LinkedHashMap<DeviceIDVO, Device>
+     + findByID(ID : DeviceIDVO) : Device
+     + isPresent(deviceID : DeviceIDVO) : boolean
+     + update(entity: Device): boolean
+     - validateEntity(device : Device) : boolean
+}
+
+class DeviceRepositoryJPA {
+    - deviceFactory : DeviceFactory
+    - entityManagerFactory : EntityManagerFactory
+    + findByID (id : DeviceIDVO) : Device
+    + isPresent (id : DeviceIDVO) : boolean
+    + updateDevice (device : Device) : boolean
+    - isNull (object : Object) : boolean
+    - getDeviceDataModelFromDeviceId (em : EntityManager, id : DeviceIDVO) : Optional<DeviceDataModel>
+}
+interface IDeviceRepositorySpringData {
+
+}
+
+class DeviceRepositorySpringData {
+    - deviceFactory : DeviceFactory
+    - iDeviceRepositorySpringData : IDeviceRepositorySpringData
+    + DeviceRepositorySpringData(deviceFactory : DeviceFactory,iDeviceRepositorySpringData : IDeviceRepositorySpringData)
+    + findById(id : DeviceIDVO) : Device
+    + isPresent(id : DeviceIDVO) : boolean
+    + update (device : Device) : boolean
+    - isNull (object : Object) : boolean
+}
+
+class DeviceDataModel {
+    - deviceID : String
+    - deviceName : String
+    - deviceModel : String
+    - deviceStatus : String
+    - roomIDVO : RoomIDVO
+    + DeviceDataModel (device : Device) : DeviceDataModel
+    + updateFromDomain (device : Device) : boolean
+    + getDeviceID() : String
+    + getDeviceName() : String
+    + getDeviceModel() : String
+    + getDeviceStatus() : String
+    + getRoomIDVO() : RoomIDVO
+
+}
+
+class DeviceAssembler {
+    + toDomain(deviceFactory : DeviceFactory, deviceDataModel : DeviceDataModel) : Device
+}
+
+interface DeviceService {
+    + deactivateDevice(deviceIDVO: DeviceIDVO) : Optional<Device>
+}
+
+class DeviceServiceImpl {
+    - roomRepository : RoomRepository
+    - deviceRepository : DeviceRepository
+    - sensorRepository: Sensor Repository
+    - actuatorRepository: ActuatorRepository
+    - deviceFactory : DeviceFactory
+
+    + DeviceServiceImpl(deviceRepository : DeviceRepository, deviceFactory : DeviceFactory)
+    + deactivateDevice(deviceID : DeviceIDVO) : Optional<Device>
+}
+
+
+interface Repository {
+    + findByID(id : ID) : T
+    + isPresent(id : ID) : boolean
+}
+
+interface DeviceRepository {
+    + update(device: Device)
+
+}
+interface SensorRepository {
+}
+
+interface ActuatorRepository {
+}
+
+interface RoomRepository {
+}
+
+interface ValueObject {
+     + getValue() : T
+}
+
+class DeviceStatusVO {
+    - deviceStatus : boolean
+    + DeviceStatusVO(deviceStatus : boolean)
+    + getValue() : Boolean
+
+}
+
+interface AggregateRoot {
+     + getId() : DomainID
+}
+
+class DeviceIDVO {
+    -DeviceID: UUID
+    +DeviceIDVO(deviceID : UUID)
+}
+
+class DeviceNameVO {
+    -deviceName: String
+    +DeviceNameVO(deviceName: String)
+}
+
+class DeviceModelVO {
+    -strDeviceModel: String
+    +DeviceModelVO(strDeviceModel: String)
+}
+
+class DeviceStatusVO {
+    -deviceStatus: boolean
+    +DeviceStatusVO(deviceStatus: boolean)
+}
+
+
+class Device {
+    -deviceIDVO: DeviceIDVO
+    -deviceNameVO: DeviceNameVO
+    -deviceModelVO: DeviceModelVO
+    -deviceStatusVO: DeviceStatusVO
+    -roomIDVO: RoomIDVO
+
+    +Device(deviceName: DeviceNameVO, deviceModel: DeviceModelVO, roomID: RoomIDVO)
+}
+
+
+
+DeviceCTRLWeb ..> DeviceService
+DeactivateDeviceCtrl ..> DeviceService
+DeactivateDeviceCtrl ..> DeviceMapper
+DeviceCTRLWeb ..> DeviceMapper
+DeviceServiceImpl ..> DeviceRepositoryMem
+DeviceMapper ..> DeviceDTO
+DeviceMapper-- DeviceIDVO : creates >
+DomainID <|.. DeviceIDVO
+DeviceRepository o-- Device
+Device ..|> AggregateRoot
+Device *-- DeviceStatusVO
+DeviceService <|.. DeviceServiceImpl
+DeviceServiceImpl ..> RoomRepository
+DeviceServiceImpl ..> DeviceRepository
+DeviceServiceImpl ..> SensorRepository
+DeviceServiceImpl ..> ActuatorRepository
+RoomRepositoryMem ..|> RoomRepository
+RoomRepositoryJPA ..|> RoomRepository
+RoomRepositorySpringData ..|> RoomRepository
+RoomRepositorySpringData .|> IRoomRepositorySpringData
+DeviceRepositoryMem ..|> DeviceRepository
+DeviceRepositoryJPA ..|> DeviceRepository
+DeviceRepositorySpringData ..|> DeviceRepository
+DeviceRepositorySpringData .|> IDeviceRepositorySpringData
+SensorRepositoryMem ..|> SensorRepository
+SensorRepositoryJPA ..|> SensorRepository
+SensorRepositorySpringData ..|> SensorRepository
+ActuatorRepositoryMem ..|> ActuatorRepository
+ActuatorRepositoryJPA ..|> ActuatorRepository
+ActuatorRepositorySpringData ..|> ActuatorRepository
+DeviceRepositoryJPA -- "*"DeviceDataModel : create >
+DeviceRepositorySpringData -- "*"DeviceDataModel : create >
+DeviceRepository --|> Repository
+ActuatorRepository --|> Repository
+RoomRepository --|> Repository
+SensorRepository --|> Repository
+DeviceRepositoryJPA ..> DeviceAssembler
+ValueObject <|.. DeviceStatusVO
+Repository ..|> AggregateRoot
+Repository ..|> DomainID
+Device "*" o-- "1" RoomIDVO
+Device "1" o-- "1" DeviceNameVO
+Device "1" o-- "1" DeviceModelVO
+Device "1" *-- "1" DeviceIDVO
+Device "1" *-- "1" DeviceStatusVO
+Device ...|> AggregateRoot
+DeviceNameVO ..|> ValueObject
+DeviceModelVO ..|> ValueObject
+DeviceStatusVO ..|> ValueObject
+
+
+@enduml

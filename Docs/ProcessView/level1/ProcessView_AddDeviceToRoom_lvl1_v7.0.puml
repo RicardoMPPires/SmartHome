@@ -1,0 +1,20 @@
+@startuml
+
+title Use Case - Add Device to Room\nProcess View Level 1 \nSuccess Scenario
+autonumber
+
+actor "Power User/\nAdministrator" as PU
+participant "**<<system (C4)>>**\nSmartHome" as SH
+
+PU -> SH : I want to add a new device to this room
+activate PU
+activate SH
+SH --> PU : Request device data
+deactivate SH
+PU -> SH : Provide device data
+activate SH
+SH --> PU : The device was added
+deactivate SH
+deactivate PU
+
+@enduml

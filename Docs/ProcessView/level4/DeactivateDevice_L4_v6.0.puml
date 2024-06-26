@@ -1,0 +1,66 @@
+@startuml
+
+autonumber
+title Use Case - Deactivate Device v6.0 - Main Success Scenario
+
+participant ":Router" as R
+participant ":DeviceCTRLWeb" as C
+participant ":DeviceMapper" as DM
+participant "deviceIDVO : DeviceIDVO" as DID
+participant ":DeviceService" as DS
+participant ":DeviceRepository" as DRM
+participant "device : Device" as D
+
+
+
+[o-> R : PATCH /devices/{id}
+
+activate R
+R -> C : deactivateDevice(deviceId)
+activate C
+
+C -> DM : createDeviceID(deviceId)
+activate DM
+DM -> DID ** : create(deviceId)
+DM --> C : **deviceIDVO**
+deactivate DM
+
+C -> DS : deactivateDevice(deviceIDVO)
+activate DS
+
+DS -> DRM : findDeviceById(deviceIDVO)
+activate DRM
+DRM --> DS : **device**
+deactivate DRM
+
+DS -> D : isActive()
+activate D
+D --> DS : **true**
+deactivate D
+
+DS -> D : deactivateDevice()
+activate D
+D --> DS : **true**
+deactivate D
+
+DS -> DRM : update(device)
+activate DRM
+DRM -> DRM : update(device)
+activate DRM
+deactivate DRM
+DRM --> DS : **true**
+deactivate DRM
+
+
+DS --> C : **device**
+deactivate DS
+
+C -> DM : domainToDTO(device)
+activate DM
+DM --> C : **deviceDTO**
+deactivate DM
+C --> R : **deviceDTO, HttpStatus.OK**
+deactivate C
+[o<-- R : **deviceJSON, HttpStatus.OK**
+deactivate R
+@enduml

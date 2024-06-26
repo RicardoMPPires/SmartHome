@@ -1,0 +1,69 @@
+@startuml
+autonumber
+title Add Room Use Case - Main Success Scenario - V6.0
+participant ":Router" as RT
+participant ":RoomCTRLWeb" as C
+participant ":RoomMapper" as RM
+participant "roomNameVO:RoomNameVO" as RNvo
+participant "roomFloorVO:RoomFloorVO" as RFvo
+participant "roomDimensionsVO:RoomDimensionsVO" as RDvo
+participant ":RoomService" as RS
+participant ":HouseRepository" as HR
+participant ":RoomFactory" as RF
+participant "room : Room" as R
+participant ":RoomRepository" as RR
+
+[o-> RT : POST /rooms
+activate RT
+
+RT-> C : addRoom(roomDTO)
+activate C
+
+C -> RM : createRoomNameVO(roomDTO)
+activate RM
+RM -> RNvo** : create(roomDTO)
+RM --> C : **roomNameVO**
+deactivate RM
+
+C-> RM : createRoomFloorVO(roomDTO)
+activate RM
+RM -> RFvo** : create(roomDTO)
+RM --> C : **roomFloorVO**
+deactivate RM
+
+C-> RM : createRoomDimensionsVO(roomDTO)
+activate RM
+RM -> RDvo** : create(roomDTO)
+RM --> C : **roomDimensionsVO**
+deactivate RM
+
+C -> RS : addRoom(roomNameVO, roomFloorVO, roomDimensionsVO)
+
+activate RS
+RS -> HR : getFirstHouseIDVO()
+activate HR
+HR --> RS : **houseIDVO**
+deactivate HR
+
+RS -> RF : createRoom(roomNameVO, roomFloorVO, roomDimensionsVO, houseIDVO)
+activate RF
+RF -> R** : create(roomNameVO, roomFloorVO, roomDimensionsVO, houseIDVO)
+RF --> RS : **room**
+deactivate RF
+
+RS -> RR : save(room)
+activate RR
+RR --> RS : **true**
+deactivate RR
+RS --> C : **room**
+deactivate RS
+
+C -> RM : domainToDTO(room)
+activate RM
+RM --> C : **roomDTO**
+deactivate RM
+C --> RT : **roomDTO, HttpStatus.CREATED**
+deactivate C
+[o<-- RT : **roomJSON, HttpStatus.CREATED**
+deactivate RT
+@enduml

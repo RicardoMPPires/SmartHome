@@ -1,0 +1,86 @@
+Position Sensor Class Diagram
+
+@startuml
+title <size: 30> Position Sensor v6.1\n<size: 25>Development view level 5 - class diagram
+
+skinparam linetype ortho
+
+interface AggregateRoot {
+    + getID() : DomainID
+}
+
+interface Sensor {
+    + getSensorTypeID() : SensorTypeIDVO;
+    + getDeviceID() : DeviceIDVO;
+    + getSensorName() : SensorNameVO;
+}
+
+interface SensorExternalServices {
+    + getValue() : String
+}
+
+
+interface ValueObject<T> {
+    + getValue() : T
+}
+
+class SensorNameVO{
+    - sensorName : String
+    + getValue() : String
+}
+
+class DeviceIDVO{
+    - deviceID : UUID
+    + getID : String
+}
+
+class SensorTypeIDVO{
+    - sensorTypeID : String
+    + getID() : String
+}
+
+class SensorIDVO{
+    - identifier : UUID
+    + getValue() : String
+}
+
+
+class PositionSensor{
+    - sensorName : SensorNameVO
+    - deviceID : DeviceIDVO
+    - sensorType : SensorTypeIDVO
+    - sensorID : SensorIDVO
+
+    + getReading(simHardware : SensorExternalServices) : ValueObject<Integer>
+}
+
+class PositionValue{
+    - position : int
+
+    + getValue() : Integer
+    - isReadingValid(positionValue : int) : boolean
+}
+
+class SimHardware{
+    + getValue() : String
+}
+
+interface DomainID {
+    + getID() : String
+}
+
+Sensor --right|> AggregateRoot
+ValueObject <|.. PositionValue
+Sensor <|.. PositionSensor
+SensorExternalServices <|.. SimHardware
+PositionSensor .right.> PositionValue
+PositionSensor .left.> SimHardware
+PositionSensor  o--right  SensorNameVO
+PositionSensor o-- DeviceIDVO
+PositionSensor  o--down  SensorTypeIDVO
+PositionSensor  o--down  SensorIDVO
+DeviceIDVO ..|> DomainID
+SensorTypeIDVO ..|> DomainID
+SensorIDVO ..|> DomainID
+SensorNameVO ..|> ValueObject
+@enduml

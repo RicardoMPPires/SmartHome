@@ -1,0 +1,101 @@
+@startuml
+
+title Get Actuators By Device Id : Main Success Scenario
+autonumber
+
+participant ":Router" as R
+participant ":ActuatorCTRLWeb" as ACW
+participant ":ActuatorMapper" as AM
+participant "deviceIDVO:DeviceIDVO" as DID
+participant ":ActuatorService" as AS
+participant ":DeviceRepository" as DR
+participant ":ActuatorRepository" as AR
+participant ":ActuatorAssembler" as AA
+participant ":ActuatorFactory" as AF
+participant "actuator:Actuator" as A
+participant ":Driver" as driver
+participant "actuatorDataModel:ActuatorDataModel" as ADT
+
+
+[o-> R : GET /actuators?deviceID={deviceID}
+activate R
+
+R -> ACW : getActuatorsByDeviceID(deviceID)
+activate ACW
+
+ACW -> AM : createDeviceIDVOFromString(device ID)
+activate AM
+
+AM -> DID** : create(deviceID)
+
+AM --> ACW : **deviceIDVO**
+deactivate AM
+
+ACW -> AS : getActuatorsByDeviceID(deviceIDVO)
+activate AS
+
+AS -> DR : isPresent(deviceIDVO)
+activate DR
+DR --> AS : **true**
+deactivate
+
+AS -> AR : findByDeviceID(deviceIDVO)
+activate AR
+
+AR -> AR : **deviceIDStr** = getDeviceIdAsString(deviceIDVO)
+
+activate AR
+deactivate AR
+
+AR -> driver: READ(deviceIDStr)
+activate driver
+
+driver ->o] : READ (deviceIdStr)
+
+driver <--o] : **data**
+driver -> ADT** :
+
+note left : Driver deserializes data into actuator data models.
+driver --> AR : **actuatorDataModelList**
+deactivate driver
+
+AR -> AA : toDomainList(actuatorFactory, actuatorDataModelList)
+activate AA
+
+loop for each actuatorDataModel in actuatorDataModelList
+AA -> AF : createActuator(actuatorDataModel)
+activate AF
+
+note right: Extracted attributes from each actuator data model
+AF -> A** : create(actuatorId,actuatorName,\nactuatorType,deviceId,settings)
+AF--> AA : **actuator**
+deactivate AF
+
+AA -> AA : **actuatorList** = actuatorList.addElement(actuator)
+activate AA
+deactivate AA
+end
+deactivate AF
+AA --> AR : **actuatorList**
+deactivate AA
+
+AR --> AS : **actuatorList**
+
+deactivate AR
+
+AS --> ACW : **actuatorList**
+deactivate AS
+
+ACW -> AM : domainToDTO(actuatorList)
+activate AM
+
+AM --> ACW : **actuatorDTOList**
+
+deactivate AM
+
+ACW --> R : **actuatorDTOList, HttpStatus.OK**
+deactivate ACW
+
+[o<-- R : **actuatorListJSON, HttpStatus.OK**
+deactivate R
+@enduml

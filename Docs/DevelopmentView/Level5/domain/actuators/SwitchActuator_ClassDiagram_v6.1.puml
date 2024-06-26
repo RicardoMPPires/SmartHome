@@ -1,0 +1,78 @@
+@startuml
+title <size: 30> Switch Actuator v6.1\n<size: 25>Development view level 5 - class diagram
+
+skinparam linetype ortho
+
+note "<b>Only methods related to Switch Actuator are represented" as 1
+
+interface Actuator {
+    +getActuatorTypeID() : ActuatorTypeIDVO
+    +getDeviceID() : DeviceIDVO
+    +getActuatorName() : ActuatorNameVO
+}
+
+interface AggregateRoot{
+    + getID() : DomainID
+}
+
+interface DomainID{
+    + getID() : String
+}
+
+interface ValueObject<T> {
+    + getValue() : T
+}
+
+class SwitchActuator{
+    - actuatorID : ActuatorIDVO
+    - actuatorName : ActuatorNameVO
+    - actuatorTypeID : ActuatorTypeIDVO
+    - deviceID : DeviceIDVO
+
+    + SwitchActuator(actuatorName : ActuatorNameVO,actuatorTypeID : ActuatorTypeIDVO,deviceID : DeviceIDVO)
+    + switchLoad(simHardwareAct : SimHardwareAct ) : boolean
+}
+
+class SimHardwareAct {
+
+}
+
+class ActuatorNameVO{
+    - actuatorName : String
+    + ActuatorNameVO(actuatorName : String)
+    + getValue() : String
+}
+
+class ActuatorIDVO{
+    - identifier : UUID
+    + ActuatorIDVO(identifier : UUID)
+}
+
+class ActuatorTypeIDVO{
+    - actuatorTypeID : String
+    + ActuatorTypeIDVO(actuatorTypeID : String)
+}
+
+class DeviceIDVO{
+    - deviceID : UUID
+    + DeviceIDVO(deviceID : UUID)
+}
+
+interface ActuatorExternalService{
+    + executeCommand() : boolean
+}
+
+Actuator --up|> AggregateRoot
+Actuator <|.. SwitchActuator
+SimHardwareAct <..up SwitchActuator
+SimHardwareAct ..|> ActuatorExternalService
+ActuatorNameVO --o SwitchActuator
+ActuatorIDVO --o SwitchActuator
+ActuatorTypeIDVO --o SwitchActuator
+DeviceIDVO --o SwitchActuator
+ValueObject <|.. ActuatorNameVO
+DomainID <|.. ActuatorIDVO
+DomainID <|.. ActuatorTypeIDVO
+DomainID <|.. DeviceIDVO
+
+@enduml

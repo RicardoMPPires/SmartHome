@@ -1,0 +1,76 @@
+@startuml
+
+title Use Case: Get devices by functionality - v6.0
+
+autonumber
+
+participant ":Router" as R
+participant ":DeviceCTRLWeb" as C
+participant ":DeviceService" as DS
+participant ":SensorRepo" as SR
+
+participant ":ActuatorRepo" as AR
+
+participant ":DeviceRepo" as DR
+participant ":DeviceDTOMapper" as DM
+
+
+[o-> R : GET /devices/byfunctionality
+activate R
+
+R-> C : getListOfDevicesByFunctionality()
+activate C
+
+C -> DS : getListOfDevicesByFunctionality()
+activate DS
+
+
+DS -> DS : **sensorMap** = getMapDeviceIDBySensorType()
+activate DS
+DS -> SR : findAll()
+activate SR
+SR --> DS :  **sensorList**
+deactivate SR
+deactivate DS
+
+note left: After retrieving sensor list. \nEach sensor's device ID is mapped\n to its respective sensor type
+
+DS -> DS : **actuatorMap** = getMapDeviceIDByActuatorType()
+activate DS
+DS -> AR : findAll()
+activate AR
+AR --> DS :  **actuatorList**
+deactivate AR
+deactivate DS
+
+note left: After retrieving actuator list. \nEach actuator's device ID is mapped\n to its respective actuator type
+
+DS -> DS : **deviceIDByFunctionalityMap** = mergeMaps(sensorMap,actuatorMap)
+activate DS
+deactivate DS
+
+loop for each entry in deviceIDByFunctionalityMap
+DS -> DR : findById(DeviceID)
+activate DR
+DR --> DS : **device**
+deactivate DR
+DS -> DS : **functionality** = entry.getKey()
+activate DS
+deactivate DS
+DS -> DS : **deviceByFunctionalityMap** = deviceByFunctionalityMap.addEntry(functionality,device)
+activate DS
+deactivate DS
+end loop
+DS --> C : **deviceByFunctionalityMap**
+deactivate DS
+
+note right of C: domainToDTO method abstracted for visibility.
+C -> DM : domainToDTO(deviceByFunctionalityMap)
+activate DM
+DM --> C : **deviceDTOByFunctionalityMap**
+deactivate DM
+C --> R : **deviceDTOByFunctionalityMap, HttpStatus.OK**
+deactivate C
+[o<-- R : **deviceByFunctionalityMapJSON, HttpStatus.OK**
+deactivate R
+@enduml

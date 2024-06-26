@@ -1,0 +1,17 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title Use Case - List Devices Grouped By Functionality \nProcess View Level 1 \nSuccess Scenario
+autonumber
+
+actor "Administrator/\nPower User" as A
+participant "**<<system (C4)>>**\nSmartHome" as SH
+
+A -> SH : I want a list of the house \ndevices grouped by functionality
+activate A
+activate SH
+SH --> A : Here is the list of devices by functionality
+deactivate SH
+deactivate A
+
+@enduml

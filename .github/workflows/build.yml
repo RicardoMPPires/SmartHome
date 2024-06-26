@@ -1,0 +1,70 @@
+name: Build Project and Run Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+  
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4.1.1
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4.2.1
+        with:
+          java-version: 17
+          distribution: 'temurin'
+          cache: 'maven'
+      
+      - name: Set up SonarQube variables
+        env:
+          SONAR_MAVEN_PLUGIN_VERSION: 3.11.0.3922
+        run: echo "SONARQUBE_PROJECT_NAME=${GITHUB_REPOSITORY#*\/}" >> $GITHUB_ENV
+        
+      - name: Cache Maven packages
+        uses: actions/cache@v4.0.2
+        with:
+          path: ~/.m2
+          #key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-m2
+          restore-keys: ${{ runner.os }}-m2
+      
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4.0.2
+        with:
+          #path: /opt/sonar-scanner/.sonar/cache/
+          path: ~/.sonar/cache/
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+                  
+      - name: Build & SonarQube DEI Scan with Maven scanner (much quicker)
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARQUBE_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONARQUBE_HOST }}
+        run: >
+          mvn -B --file pom.xml test jacoco:report 
+          verify 
+          org.sonarsource.scanner.maven:sonar-maven-plugin:${SONAR_MAVEN_PLUGIN_VERSION}:sonar 
+          -Dsonar.sourceEncoding=UTF-8 
+          -Dsonar.sources=src/main/ 
+          -Dsonar.cpd.exclusions=**/test/** 
+          -Dsonar.issue.ignore.multicriteria=e5,e6,e7,e8,e9,e10 
+          -Dsonar.issue.ignore.multicriteria.e5.ruleKey=squid:S106 
+          -Dsonar.issue.ignore.multicriteria.e5.resourceKey=**/ui/**/*.java 
+          -Dsonar.issue.ignore.multicriteria.e6.ruleKey=squid:S00112 
+          -Dsonar.issue.ignore.multicriteria.e6.resourceKey=**/*.java 
+          -Dsonar.issue.ignore.multicriteria.e7.ruleKey=squid:S1148 
+          -Dsonar.issue.ignore.multicriteria.e7.resourceKey=**/*.java 
+          -Dsonar.issue.ignore.multicriteria.e8.ruleKey=squid:S1166 
+          -Dsonar.issue.ignore.multicriteria.e8.resourceKey=**/*.java 
+          -Dsonar.issue.ignore.multicriteria.e9.ruleKey=squid:S2250 
+          -Dsonar.issue.ignore.multicriteria.e9.resourceKey=**/*.java 
+          -Dsonar.issue.ignore.multicriteria.e10.ruleKey=squid:S3422 
+          -Dsonar.issue.ignore.multicriteria.e10.resourceKey=**/*.xml
+          -Dsonar.projectName="SWITCH-2023 $SONARQUBE_PROJECT_NAME"

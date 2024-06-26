@@ -1,0 +1,155 @@
+@startuml
+
+title <size: 30> Use Case: Get Actuators By Device ID v6.0 \n Implementation view level 4 - class diagram
+note "<b>Only methods related to\n<b>Get Actuators By Device ID are represented" as N1
+skinparam linetype ortho
+
+ActuatorCTRLWeb ..> ActuatorMapper
+ActuatorCTRLWeb ..> ActuatorService
+
+ActuatorServiceImpl ..> ActuatorFactory
+ActuatorServiceImpl .up.> ActuatorRepository
+ActuatorServiceImpl .up.> DeviceRepository
+ActuatorServiceImpl ..|> ActuatorService
+
+AggregateRoot <|-up- Actuator
+
+ActuatorMapper ..> ActuatorDTO
+
+DeviceRepository --|> Repository
+ActuatorRepository --|> Repository
+
+DeviceIDVO ..|> DomainID
+
+
+ActuatorRepositorySpringData ..|> ActuatorRepository
+ActuatorFactoryImpl .up.|> ActuatorFactory
+ActuatorAssembler ..> ActuatorFactory
+ActuatorFactoryImpl ..> Actuator : create >
+
+ActuatorRepositorySpringData -up- "*"ActuatorDataModel : create >
+ActuatorRepositorySpringData .> IActuatorRepositorySpringData
+ActuatorMapper ..> DeviceIDVO
+DeviceRepositorySpringData ..|> DeviceRepository
+DeviceRepositorySpringData ..> IDeviceRepositorySpringData
+IDeviceRepositorySpringData --|> JPARepository
+IActuatorRepositorySpringData --|> JPARepository
+ActuatorRepositorySpringData ..> ActuatorAssembler
+
+class ActuatorCTRLWeb{
+- actuatorService : ActuatorService
+
++ActuatorCTRLWeb(actuatorService : ActuatorService)
++getActuatorsByDeviceId(deviceId : String) : ResponseEntity<CollectionModel<ActuatorDTO>>
+}
+
+interface ActuatorService{
++getListOfActuatorsInADevice(deviceIDVO : DeviceIDVO) : List<Actuator>
+}
+
+class ActuatorServiceImpl {
+-deviceRepository : DeviceRepository
+-actuatorTypeRepository : ActuatorTypeRepository
+-actuatorFactory : ActuatorFactory
+-actuatorRepository : ActuatorRepository
+-actuatorExternalService : ActuatorExternalService
+
++ActuatorServiceImpl(deviceRepository : DeviceRepository, actuatorTypeRepository : ActuatorTypeRepository,\nactuatorFactory : ActuatorFactory, actuatorRepository : ActuatorRepository)
++getListOfActuatorsInADevice(deviceIDVO : DeviceIDVO) : List<Actuator>
+}
+
+interface Repository{
++isPresent(id : ID) : boolean
+}
+
+interface DeviceRepository {
+}
+
+interface IDeviceRepositorySpringData {
+}
+
+class DeviceRepositorySpringData {
+- deviceFactory : DeviceFactory
+- iDeviceRepositorySpringData : IDeviceRepositorySpringData
+
++ isPresent(id : DeviceIDVO) : boolean
+}
+
+interface ActuatorRepository{
++findByDeviceId(deviceIDVO : DeviceIDVO)  : Iterable<Actuator>
+}
+
+interface IActuatorRepositorySpringData{
++findByDeviceId(deviceIDVO : DeviceIDVO) : Iterable<ActuatorDataModel>
+}
+
+class ActuatorRepositorySpringData{
+-iActuatorRepositorySpringData : IActuatorRepositorySpringData
+-actuatorFactory : ActuatorFactory
++ActuatorRepositorySpringData(actuatorFactory : ActuatorFactory, iActuatorRepositorySpringData : IActuatorRepositorySpringData)
++findByDeviceId(deviceIDVO : DeviceIDVO) : Iterable<Actuator>
+}
+
+class ActuatorDataModel{
+-actuatorID: String
+-actuatorName: String
+-actuatorTypeID: String
+-deviceID: String
+-lowerLimit: String
+-upperLimit: String
+-precision: String
+}
+
+class ActuatorAssembler{
++toDomainList(actuatorFactory : ActuatorFactory, actuatorDataModels : Iterable<ActuatorDataModel>) : Iterable<Actuator>
++toDomain(actuatorFactory : ActuatorFactory, actuatorDataModel : ActuatorDataModel) : Actuator
+}
+
+interface ActuatorFactory{
++createActuator(actuatorIDVO : ActuatorIDVO, actuatorName : ActuatorNameVO, actuatorTypeIDVO : ActuatorTypeIDVO, deviceIDVO : DeviceIDVO, settings : Settings) : Actuator
+}
+
+class ActuatorFactoryImpl{
+-configuration: Configuration
++createActuator(actuatorIDVO : ActuatorIDVO, actuatorName : ActuatorNameVO, actuatorTypeIDVO : ActuatorTypeIDVO, deviceIDVO : DeviceIDVO, settings : Settings) : Actuator
+}
+
+
+interface Actuator{
+}
+
+class ActuatorMapper{
+- ERRORMESSAGE : String
+
++createDeviceIDVOFromString(deviceId : String) : DeviceIDVO
++domainToDTO(actuators : List<Actuator>) : List<ActuatorDTO>
++domainToDTO(actuator : Actuator) : ActuatorDTO
+}
+
+class ActuatorDTO{
+-actuatorId : String
+-actuatorName: String
+-actuatorType : String
+-deviceId : String
+-lowerLimit : String
+-upperLimit : String
+-precision : String
+}
+
+class DeviceIDVO {
+-deviceId : UUID
+
++DeviceIDVO(deviceId : UUID)
+}
+
+interface AggregateRoot{
++getID() : DomainID
+}
+
+interface DomainID{
++getID() : String
+}
+
+interface JPARepository{
+}
+@enduml

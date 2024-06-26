@@ -1,0 +1,26 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title Use Case - List All Device Measurements\nProcess View Level 2 \n Success Scenario
+autonumber
+
+participant "**<<container (C4)>>**\nBackend" as BE
+
+!pragma teoz true
+box "  <<System>>\n:SmartHome" #DarkGrey
+
+participant "**<<container (C4)>>**\n:Frontend" as FE
+participant "**<<container (C4)>>**\n:Backend" as BE
+
+[o-> FE : List this device measurements
+activate FE
+FE -> BE : GET /logs (device information)
+activate BE
+BE --> FE : logs data + HTTP Status
+deactivate BE
+[o<-- FE : Device measurements!
+deactivate FE
+end box
+
+
+@enduml

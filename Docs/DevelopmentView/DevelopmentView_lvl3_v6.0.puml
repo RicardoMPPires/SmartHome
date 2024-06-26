@@ -1,0 +1,13 @@
+@startuml
+title Implementation View - Level 3 - Focus: Backend
+top to bottom direction
+
+package "Backend"{
+    package "Server"{
+    }
+    package "Database"{
+    }
+
+    "Server" ..> "Database"
+}
+@enduml

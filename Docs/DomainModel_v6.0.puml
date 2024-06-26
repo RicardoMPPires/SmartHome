@@ -1,0 +1,100 @@
+@startuml
+title <size: 30> Domain Model - v6.0
+
+
+hide circle
+hide empty members
+
+'left to right direction
+
+class House {
+
+}
+
+class SensorType {
+}
+
+class ActuatorType {
+}
+
+class Address {
+doorReference
+buildingNumber
+streetName
+city
+country
+zipCode
+}
+
+class GPS {
+latitude
+longitude
+}
+
+class Room {
+name
+houseFloor
+}
+
+class RoomDimensions {
+width
+length
+height
+}
+
+class Device {
+deviceName
+deviceModel
+roomName
+}
+
+
+class Sensor {
+}
+
+class ExternalEntity {
+}
+
+class SensorType {
+}
+
+class Actuator {
+}
+
+class ActuatorType {
+}
+
+class User {
+}
+
+class UserRole {
+}
+
+class Log {
+}
+
+User "*" -- "1..*" UserRole : > has
+User "1..*"-- "1" House : > can configure
+User "1" -- "*" Room : < is managed
+User "1" --- "*" Room : > may add
+User "1" --- "*" Device : > may add
+User "1" --- "*" Sensor : > may add
+User "1" --- "*" Actuator : > may add
+
+House "1" -- "*" Room : > has
+House "1" -- "1" Location : > has
+Location "1" -- "1" GPS : > is composed by
+Location "1" -- "1" Address : > is composed by
+
+Room "1" -- "*" Device : > has
+Room "1" -- "1" RoomDimensions : > has
+
+Sensor "*" -- "1" SensorType : > has
+Sensor "1" -up "*" Log : > has
+Actuator "*" -- "1" ActuatorType : > has
+Device "1" -- "*" Sensor : > can have
+Device "1" -- "*" Actuator : > can have
+Sensor "1" -- "1" ExternalEntity : > reads from
+Actuator "1" -- "1" ExternalEntity : > acts on
+
+@enduml

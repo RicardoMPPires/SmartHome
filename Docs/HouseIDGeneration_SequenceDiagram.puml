@@ -1,0 +1,23 @@
+@startuml
+
+autonumber
+
+title House ID Generation
+
+participant ":FactoryHouse" as FH
+participant "house:House" as H
+participant "houseID : HouseID" as HID
+
+
+[o-> FH : createHouse()
+activate FH
+FH -> H** : create()
+activate H
+H -> HID** : create(UUID)
+deactivate H
+[o<-- FH : house
+deactivate FH
+
+
+
+@enduml

@@ -1,0 +1,35 @@
+/* StatusSlider.css */
+
+.status-slider-container {
+    /* Styles for the container div */
+}
+
+.status-slider-button {
+    border-radius: 20px;
+    margin-top: 10px;
+    color: white; /* Set default text color to white */
+}
+
+.success-feedback {
+    color: green;
+}
+
+.error-feedback {
+    color: red;
+}
+
+.status-slider-button.unsaved-changes {
+    background-color: green; /* Change background color to green for unsaved changes */
+}
+
+.status-slider-button.unsaved-changes:hover {
+    background-color: green; /* Maintain green background color on hover for unsaved changes */
+}
+
+.status-slider-button.grey {
+    background-color: grey; /* Set default background color to grey */
+}
+
+.status-slider-button.grey:hover {
+    background-color: grey; /* Maintain grey background color on hover */
+}

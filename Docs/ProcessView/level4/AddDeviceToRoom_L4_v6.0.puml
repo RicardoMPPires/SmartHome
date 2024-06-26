@@ -1,0 +1,73 @@
+@startuml
+
+autonumber
+title Use Case - Add Device to Room v6.0 - Main Success Scenario
+
+participant ":Router" as R
+participant ":DeviceCTRLWeb" as C
+participant ":DeviceMapper" as DM
+participant "roomIDVO : RoomIDVO" as RID
+participant "deviceNameVO : DeviceNameVO" as DN
+participant "deviceModelVO : DeviceModelVO" as DMo
+participant ":DeviceService" as DS
+participant ":RoomRepository" as RR
+participant ":DeviceFactory" as DF
+participant "device : Device" as D
+participant ":DeviceRepository" as DRM
+
+
+
+[o-> R : POST /devices
+activate R
+R -> C : addDeviceToRoom(deviceDTO)
+activate C
+
+C -> DM : createDeviceName(deviceDTO)
+activate DM
+DM -> DN ** : create(deviceName)
+DM --> C : deviceNameVO
+deactivate DM
+
+C -> DM : createDeviceModel(deviceDTO)
+activate DM
+DM -> DMo ** : create(deviceModel)
+DM --> C : deviceModelVO
+deactivate DM
+
+C -> DM : createRoomIDVO(deviceDTO)
+activate DM
+DM -> RID** : create(roomID)
+DM -> C : roomIDVO
+deactivate DM
+
+C -> DS : addDevice(deviceNameVO, deviceModelVO, roomIDVO)
+activate DS
+
+DS -> RR : isPresent(roomIDVO)
+activate RR
+RR --> DS : **true**
+deactivate RR
+
+DS -> DF : createDevice(deviceNameVO, deviceModelVO, roomIDVO)
+activate DF
+DF -> D ** : create(deviceNameVO, deviceModelVO, roomIDVO)
+DF --> DS : device
+deactivate DF
+
+DS -> DRM : save(device)
+activate DRM
+DRM --> DS : **true**
+deactivate DRM
+
+DS --> C : **device**
+deactivate DS
+
+C -> DM : domainToDTO(device)
+activate DM
+DM --> C : **deviceDTO**
+deactivate DM
+C --> R : **deviceDTO, HttpStatus.CREATED**
+deactivate C
+[o<-- R : **deviceJSON, HttpStatus.CREATED**
+deactivate R
+@enduml

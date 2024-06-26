@@ -1,0 +1,27 @@
+@startuml
+
+title Use Case - Add a Sensor to Device\nProcess View Level 2 \nSuccess Scenario
+autonumber
+
+!pragma teoz true
+box "  <<System>>\n:SmartHome" #DarkGrey
+
+participant "**<<container (C4)>>**\n:Frontend" as FE
+participant "**<<container (C4)>>**\n:Backend" as BE
+
+[o-> FE : Add a new sensor to this device
+activate FE
+[o<-- FE : Request sensor data
+|||
+[o-> FE : Provide sensor data
+FE -> BE : POST /sensors (sensor information)
+activate BE
+BE --> FE : new sensor data + HTTP Status
+deactivate BE
+[o<-- FE : Sensor added!
+deactivate FE
+end box
+
+
+
+@enduml

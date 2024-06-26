@@ -1,0 +1,138 @@
+@startuml
+
+autonumber
+title Use Case - Get Peak Power Consumption in a Given Period - Main Success Scenario
+
+note left: Abstracted operations as they\n assume external communication
+participant "Router" as RT
+participant ":LogCTRLWeb" as C
+participant ":TimeConfigMapper" as TCA
+participant "initialTimeStamp:TimeStampVO" as TSinit
+participant "finalTimeStamp:TimeStampVO" as TSfinal
+participant "deltaVO:DeltaVO" as delta
+participant ":LogService" as LS
+participant ":LogRepository" as LR
+
+
+[o-> RT : GET /logs/peak-power-consumption
+
+activate RT
+RT-> C : getPeakPowerConsumption(timeConfigDTO)
+activate C
+
+C -> TCA : createInitialTimeStamp(timeConfigDTO)
+activate TCA
+TCA ->  TSinit** : create(initialDate,initialTime)
+TCA -> C : **initialTimeStamp**
+deactivate TCA
+
+C -> TCA : createFinalTimeStamp(timeConfigDTO)
+activate TCA
+TCA -> TSfinal** : create(finalDate,finalTime)
+TCA -> C : **finalTimeStamp**
+deactivate TCA
+
+C -> TCA : createDeltaVO(timeConfigDTO)
+activate TCA
+TCA -> delta** : create(delta)
+TCA -> C : **deltaVO**
+deactivate TCA
+
+C -> LS : getPeakPowerConsumption(initialTimeStamp, finalTimeStamp, deltaVO)
+activate LS
+
+LS -> LS : areTimeStampsValid(initialTimeStamp, finalTimeStamp)
+activate LS
+deactivate LS
+
+
+LS -> LS : **deviceID** = SystemProperty("Grid Power Meter Device")
+activate LS
+deactivate LS
+
+LS -> LS : **sensorTypeID** = SystemProperty("Grid Power Meter Sensor Type")
+activate LS
+deactivate LS
+
+
+LS -> LR : findByDeviceIDAndSensorTypeAndTimeBetween(deviceID, sensorTypeID, initialTimeStamp, finalTimeStamp)
+activate LR
+LR --> LS : **powerGridLogs**
+deactivate LR
+
+LS -> LR : findByNegativeReadingAndNotDeviceIDAndSensorTypeAndTimeBetween(deviceID, sensorTypeID, initialTimeStamp, finalTimeStamp)
+activate LR
+LR --> LS  : **powerSourcesLogs**
+deactivate LR
+
+LS -> LS : powerGridHasLogs(powerGridLogs)
+activate LS
+deactivate LS
+
+LS -> LS : powerSourceHasLogs(powerSourceLogs)
+activate LS
+deactivate LS
+
+alt no power sources logs
+
+LS -> LS : **log** = getMaxLog(powerGridLogs)
+activate LS
+deactivate LS
+
+LS -> LS : **logTime** = getTime(log)
+activate LS
+deactivate LS
+
+LS -> LS : **logValue** = getValue(log)
+activate LS
+deactivate LS
+
+LS --> C : Peak consumption is **logValue** at **logTime**
+C --> RT : Peak consumption is **logValue** at **logTime**, HttpStatus.OK
+
+[o<-- RT : Peak consumption is **logValue** at **logTime**, HttpStatus.OK
+
+
+else #LightBlue power source has logs
+
+loop for each log in **powerGridLogs**
+LS -> LS : **powerGridTime** = getTime(log)
+activate LS
+deactivate LS
+LS -> LS : **powerGridValue** = getValue(log)
+activate LS
+deactivate LS
+
+loop for each log in **powerSourceLogs**
+LS -> LS : **powerSourceTime** = getTime(log)
+activate LS
+deactivate LS
+
+LS -> LS : isWithinTimeWindow(**powerGridTime**,**powerSourceTime**,deltaVO)
+activate LS
+deactivate LS
+
+LS -> LS : **powerSourceValue** = getValue(log)
+activate LS
+deactivate LS
+
+LS -> LS : **totalValue** = sumPowerSrcAbsoluteValue(**powerSourceValue**)
+activate LS
+deactivate LS
+end
+
+LS -> LS : isPeakConsumption(**totalValue**)
+activate LS
+deactivate LS
+
+end
+
+LS --> C : Peak consumption is **totalValue** at **powerGridTime**
+deactivate LS
+C --> RT : Peak consumption is **totalValue** at **powerGridTime**, HttpStatus.OK
+deactivate C
+
+[o<-- RT : Peak consumption is **totalValue** at **powerGridTime**, HttpStatus.OK
+deactivate RT
+end
+@enduml

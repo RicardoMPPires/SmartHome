@@ -1,0 +1,104 @@
+@startuml
+'https://plantuml.com/component-diagram
+
+title Logical View - Code Backend Server (Level 4)
+
+
+' Define outer interfaces
+interface "Rest API" as RestAPI
+interface "JPA API" as JPAAPI
+interface "Smart Device API" as SmartDeviceAPI
+
+' Define the main component
+component "BackEnd Server" <<component>> as F{
+    port " " as OuterPortRestAPI
+    port " " as OuterPortJPAAPI
+    port " " as OuterPortSmartDeviceAPI
+
+    component "DataModel" <<component>>
+    component "DTO" <<component>>
+
+    package "Framework and Drivers Layer"{
+        component "Routing" <<component>>
+        component "Persistence" <<component>>
+        component "Smart Device Driver" <<component>>
+    }
+
+    package "Interface Adapters Layer"{
+        component "Controller" <<component>>
+        component "Repository" <<component>>
+        component "Smart Device Gateway" <<component>>
+    }
+
+    package "Application Business Rules Layer"{
+        component "Application Service" <<component>>
+    }
+
+    package "Enterprise Business Rules Layer"{
+        component "Domain Model" <<component>>
+    }
+
+    ' Define internal interfaces
+    interface "Controller REST API" as ControllerAPI
+    interface "DataModel API" as DataModelAPI
+    interface "Persistence API" as PersistenceAPI
+    interface "Smart Device Gateway API" as SmartDeviceDriverAPI
+    interface "Domain API" as DomainAPI
+    interface "Application Service API" as ApplicationServiceAPI
+    interface "DTO API" as DTOAPI
+    interface "Repository API" as RepositoryAPI
+    interface "Gateway API"
+}
+
+
+' Outer port connections
+OuterPortRestAPI -up- RestAPI
+OuterPortJPAAPI -up-( JPAAPI
+OuterPortSmartDeviceAPI -up-( SmartDeviceAPI
+
+' Connecting framework and drivers layers to outer ports
+OuterPortRestAPI -down-- "Routing"
+OuterPortJPAAPI -down-- "Persistence"
+
+' Connecting framework and drivers layer to interface layer APIs
+"Routing" -down--( ControllerAPI
+"Routing" --( DTOAPI
+"DataModel" -down- DataModelAPI
+"Persistence" -down--( DataModelAPI
+"Persistence" -down-- PersistenceAPI
+
+' Connecting interface adapter layer to their APIs
+"Controller" -up- ControllerAPI
+"Repository" -down- RepositoryAPI
+"Repository" -up-( DataModelAPI
+"Repository" -up-( PersistenceAPI
+
+' Connecting interface adapter layer to application business rules APIs
+"DTO" -left- DTOAPI
+"Controller" --( ApplicationServiceAPI
+"Controller" -up-( DTOAPI
+"Repository" -down--( DomainAPI
+
+' Connecting application business rules components APIs
+ApplicationServiceAPI -down- "Application Service"
+"Application Service" -left-( DomainAPI
+"Application Service" -up-( "Gateway API"
+"Application Service" -up-( RepositoryAPI
+
+' Connecting Domain model to its API
+"Domain Model" -up--- DomainAPI
+
+"Smart Device Gateway" -up-( SmartDeviceDriverAPI
+"Smart Device Gateway" -- "Gateway API"
+"Smart Device Gateway" --( DomainAPI
+
+"Smart Device Driver" -- SmartDeviceDriverAPI
+"Smart Device Driver" -- OuterPortSmartDeviceAPI
+
+'Interfaces and Implementations
+"Repository" ..|> "Domain Model"
+"Smart Device Gateway" ..|> "Domain Model"
+
+note right of F: We have incorporated the \nconcept of an external device \ndriver and gateway into our design. \nAlthough not implemented directly, \nwe have developed a class named \n"SimHardware" to simulate this \nfunctionality. The inclusion of the \ndevice driver and gateways is \nintended to illustrate the \nproposed process.
+
+@enduml

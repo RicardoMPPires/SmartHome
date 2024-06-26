@@ -1,0 +1,27 @@
+@startuml
+
+title Use Case - List Existing Rooms \nProcess View Level 2 \n Success Scenario
+/'
+As a Room Owner [or Power User, or Administrator], I want to get a list of all
+devices in a room.
+'/
+autonumber
+
+!pragma teoz true
+box "  <<System>>\n:SmartHome" #DarkGrey
+
+participant "**<<container (C4)>>**\n:Frontend" as FE
+participant "**<<container (C4)>>**\n:Backend" as BE
+
+[o-> FE : List all rooms
+activate FE
+FE -> BE : GET /rooms
+activate BE
+BE --> FE : rooms data + HTTP Status
+deactivate BE
+[o<-- FE : Rooms!
+deactivate FE
+end box
+
+
+@enduml

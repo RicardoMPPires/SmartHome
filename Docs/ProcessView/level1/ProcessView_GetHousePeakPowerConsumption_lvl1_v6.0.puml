@@ -1,0 +1,25 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title Use Case - Get the Peak Power Consumption of the House in a Given Period\nProcess View Level 1 \nSuccess Scenario
+autonumber
+
+actor "Administrator/\nPower User" as A
+participant "**<<system(C4)>>**\nSmartHome" as SH
+
+A -> SH : I want to get the peak power consumption of the house
+activate A
+activate SH
+SH --> A : Request time period and offset value for data comparison
+deactivate SH
+A -> SH : Provide time period and offset value
+activate SH
+SH --> A : Provide the peak power consumption \nin the selected period
+deactivate SH
+deactivate A
+
+
+
+
+
+@enduml

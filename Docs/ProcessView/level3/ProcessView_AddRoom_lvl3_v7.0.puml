@@ -1,0 +1,38 @@
+@startuml
+
+title Use Case - Add a Room to the House\nProcess View Level 3 - Backend Interaction \n Main Success Scenario
+autonumber
+<style>
+    title {
+      HorizontalAlignment center
+      FontSize 18
+      padding 20
+    }
+</style>
+
+!pragma teoz true
+
+box "<<container (C4)>>\n     :Backend" #LightGrey
+  participant "**<<component (C4)>>**\n:Server" as SERVER
+  participant "**<<component (C4)>>**\n:Database" as DB
+end box
+
+[o-> SERVER : POST /rooms (room information)
+activate SERVER
+
+SERVER -> DB: Get persisted house
+activate DB
+DB --> SERVER: Retrieve house
+deactivate DB
+|||
+SERVER -> SERVER : Create new room
+|||
+SERVER -> DB : Save room
+activate DB
+DB --> SERVER : Send validation
+deactivate DB
+
+[o<-- SERVER : new room data + HTTP Status
+deactivate SERVER
+
+@enduml

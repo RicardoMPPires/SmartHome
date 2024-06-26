@@ -1,0 +1,46 @@
+@startuml
+
+    title Get Actuator By ID : Main Success Scenario
+    autonumber
+participant ":Router" as R
+participant ":ActuatorCTRLWeb" as C
+participant ":ActuatorMapper" as AM
+participant "actuatorIdVO:ActuatorIdVO" as actID
+participant ":ActuatorService" as AS
+participant ":ActuatorRepository" as ATR
+
+[o-> R : GET /actuators/{actuatorId}
+activate R
+
+R -> C : getActuatorByID(actuatorId)
+activate C
+
+C -> AM : createActuatorID(actuatorId)
+activate AM
+AM -> actID** : create(actuatorId)
+AM --> C : **actuatorIdVO**
+deactivate AM
+
+C -> AS : getActuatorByID(actuatorIdVO)
+activate AS
+
+AS -> ATR : isPresent(actuatorIdVO)
+activate ATR
+ATR --> AS : **true**
+deactivate ATR
+
+AS -> ATR : findActuatorByID(actuatorIdVO)
+activate ATR
+ATR --> AS : **actuator**
+deactivate ATR
+AS --> C : **actuator**
+deactivate AS
+C -> AM : domainToDTO(actuator)
+activate AM
+AM --> C : **actuatorDTO**
+deactivate AM
+C --> R : actuatorDTO, HttpStatus.OK
+deactivate C
+[o<-- R : actuatorJSON, HttpStatus.OK
+deactivate R
+@enduml

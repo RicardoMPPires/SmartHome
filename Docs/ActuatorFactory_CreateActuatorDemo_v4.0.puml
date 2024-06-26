@@ -1,0 +1,25 @@
+@startuml
+
+autonumber
+
+title Actuator Factory - Create Actuator Demo
+
+participant ":ActuatorFactory" as F
+participant ":ActuatorTypeIDVO" as ATID
+participant "actuator : ActuatorImplementation" as AI
+
+note right of F: Actuator Factory has an encapsulated configuration object \nwhich is dynamically created during factory instantiation, with\na pre-defined file, containing actuator properties. This file is \ncomposed by key-value pairs where the key corresponds to \nthe ActuatorTypeID (in a string format) and the value, which indicates \nthe path for the correct Class. The method getString() is interacting with the\nConfiguration object, to verify if the required actuator type is available and if a\npath is found.\n**NOTE**: Settings may be null (case of actuators without defined limits).
+[o-> F : createActuator(actuatorName, actuatorTypeID, deviceID, settings)
+activate F
+F -> F : validParameters(actuatorName, actuatorTypeID, deviceID)
+F -> F : getPath(actuatorTypeID)
+activate F
+F -> ATID : actuatorID = getID()
+F -> F : path = getString(actuatorID)
+deactivate F
+
+F -> AI** : create(actuatorName, actuatorTypeID, deviceID)\n <font color=red>**or**</font> \ncreate(actuatorName, actuatorTypeID, deviceID, settings)
+[o<- F : actuator
+deactivate F
+
+@enduml

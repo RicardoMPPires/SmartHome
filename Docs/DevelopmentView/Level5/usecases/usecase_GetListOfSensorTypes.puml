@@ -1,0 +1,111 @@
+@startuml
+title <size: 30> Get List of Sensor Types v6.0\n Development view level 5- class diagram
+note "<b>Only methods related to 'get list of sensor types'\n<b> use case are represented" as N1
+skinparam linetype ortho
+
+GetListOfSensorTypesCTRL ..> SensorTypeService
+
+SensorTypeCTRLWeb ..> SensorTypeMapper
+GetListOfSensorTypesCTRL ..> SensorTypeMapper
+SensorTypeServiceImpl ..down> SensorTypeRepository
+SensorTypeServiceImpl ..up|> SensorTypeService
+SensorTypeServiceImpl ..up> SensorTypeMapper
+SensorTypeRepositoryMem ..right|> SensorTypeRepository
+SensorTypeRepositoryJPA ..left|> SensorTypeRepository
+SensorTypeRepositorySpringData ..up|> SensorTypeRepository
+SensorTypeRepository -up-|> Repository
+SensorTypeMapper ..> SensorTypeDTO
+SensorTypeRepositoryJPA ..right> SensorTypeFactory
+SensorTypeFactoryImpl ..up|> SensorTypeFactory
+SensorTypeRepositoryJPA ..down> SensorTypeAssembler
+SensorTypeRepositorySpringData ..right> SensorTypeAssembler
+SensorTypeRepositorySpringData ..> SensorTypeFactory
+SensorTypeRepositorySpringData ..> ISensorTypeRepositorySpringData
+SensorTypeAssembler ..> SensorTypeFactory
+SensorTypeAssembler ..> SensorTypeDataModel
+SensorTypeCTRLWeb ..> SensorTypeService
+
+
+interface ISensorTypeRepositorySpringData{
+}
+
+class SensorTypeRepositorySpringData{
+repositorySpringData : ISensorTypeRepositorySpringData;
+factory : SensorTypeFactory;
+
++ findAll() : Iterable<SensorType>
+}
+class SensorTypeDataModel{
+    - sensorTypeId : String;
+    - unit : String;
+}
+
+
+class SensorTypeAssembler{
+    toDomain(factory : SensorTypeFactory,\n listDataModel : Iterable<SensorTypeDataModel> ) : Iterable<SensorType>;
+    toDomain(factory : SensorTypeFactory,\n sensorTypeDataModel : SensorTypeDataModel ) : SensorType;
+}
+
+
+class SensorTypeFactoryImpl{
+    + createSensorType(sensorTypeIDVO : SensorTypeIDVO, unitVO : UnitVO) : SensorType
+}
+
+interface SensorTypeFactory{
+    + createSensorType(sensorTypeIDVO : SensorTypeIDVO, unitVO : UnitVO) : SensorType
+}
+
+class SensorTypeRepositoryJPA{
+    sensorTypeFactory : SensorTypeFactory;
+    entityManagerFactory : EntityManagerFactory;
+    + findAll() : Iterable<SensorType>
+}
+
+class GetListOfSensorTypesCTRL {
+    - sensorTypeService: SensorTypeService
+    +GetListOfSensorTypesCTRL(sensorTypeService: SensorTypeService)
+    +getListOfSensorTypes(): List<SensorTypeDTO>
+}
+
+class SensorTypeCTRLWeb {
+    - sensorTypeService: SensorTypeService
+    +SensorTypeCTRLWeb(sensorTypeService: SensorTypeService)
+    +getListOfSensorTypes(): List<SensorTypeDTO>
+}
+
+class SensorTypeServiceImpl {
+    - sensorTypeRepository: SensorTypeRepository
+    - sensorTypeFactory: SensorTypeFactory
+
+    +SensorTypeService(sensorTypeRepository: SensorTypeRepository, sensorTypeFactory: SensorTypeFactory, path: String)
+    +getListOfSensorTypes(): List<SensorType>
+}
+
+class SensorTypeRepositoryMem{
+    - DATA: Map<SensorTypeIDVO, SensorType>
+
+    + findAll(): Iterable<SensorType>
+}
+
+class SensorTypeMapper {
+    +domainToDTO(sensorTypeList: List<SensorType>): List<SensorTypeDTO>
+}
+
+interface SensorTypeService {
+    + getListOfSensorTypes(): List<SensorType>
+}
+
+interface SensorTypeRepository {}
+
+interface Repository {
+    + findAll() : Iterable<T>
+
+}
+
+class SensorTypeDTO {
+    - sensorTypeID: String
+    - unit: String
+
+}
+
+@enduml

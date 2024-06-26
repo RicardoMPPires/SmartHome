@@ -1,0 +1,97 @@
+@startuml
+title <size: 30> Integer Value Actuator v6.1\n<size: 25>Development view level 5 - class diagram
+
+note "<b>Only methods related to\n<b>IntegerValueActuator are represented" as 1
+
+skinparam linetype ortho
+
+interface Actuator {
+    + getActuatorTypeID() : ActuatorTypeIDVO
+    + getDeviceID() : DeviceIDVO
+    + getActuatorName() : ActuatorNameVO
+    + getLowerLimit() : String
+    + getUpperLimit() : String
+}
+
+interface AggregateRoot{
+    + getID() : DomainID
+}
+
+interface DomainID{
+    + getID() : String
+}
+
+interface ValueObject<T> {
+    + getValue() : T
+}
+
+interface ActuatorExternalService{
+    + executeIntegerCommandSim(position : int) : boolean
+}
+
+interface Settings{
+}
+
+class IntegerValueActuator <<Entity>>{
+    - actuatorID : ActuatorIDVO
+    - actuatorName : ActuatorNameVO
+    - actuatorTypeID : ActuatorTypeIDVO
+    - deviceIDVO : DeviceIDVO
+    - integerSettings : IntegerSettingsVO
+
+    + IntegerValueActuator(actuatorName : ActuatorNameVO, actuatorTypeID : ActuatorTypeIDVO,\n deviceID : DeviceIDVO, settings : Settings)
+    + IntegerValueActuator(actuatorId : ActuatorIDVO, actuatorName : ActuatorNameVO, actuatorTypeID : ActuatorTypeIDVO,\n deviceID : DeviceIDVO, settings : Settings)
+    + executeCommand(simHardwareAct : SimHardwareAct, value : int) : String
+    - isValueWithinLimits(value : int) : boolean
+}
+
+
+class SimHardwareAct {
+}
+
+class ActuatorNameVO <<Value Object>>{
+    - actuatorName : String
+    + ActuatorNameVO(actuatorName : String)
+    + getValue() : String
+}
+
+class ActuatorIDVO <<Value Object>><<ID>>{
+    - identifier : UUID
+    + ActuatorIDVO(identifier : UUID)
+}
+
+class ActuatorTypeIDVO <<Value Object>><<ID>>{
+    - actuatorTypeID : String
+    + ActuatorTypeIDVO(actuatorTypeID : String)
+}
+
+class DeviceIDVO <<Value Object>><<ID>>{
+    - deviceID : UUID
+    + DeviceIDVO(deviceID : UUID)
+}
+
+class IntegerSettingsVO <<Value Object>>{
+    - lowerLimit : int
+    - upperLimit : int
+
+    + IntegerSettingsVO(lowerLimit : String, upperLimit : String)
+    + getValue() : Integer[]
+    - validLimits(lowerLimit : int, upperLimit : int) : boolean
+}
+
+ValueObject <|-- Settings
+AggregateRoot <|-- Actuator
+Actuator <|.. IntegerValueActuator
+SimHardwareAct <.. IntegerValueActuator
+ActuatorExternalService <|.. SimHardwareAct
+ActuatorNameVO --o IntegerValueActuator
+ActuatorIDVO --o IntegerValueActuator
+ActuatorTypeIDVO --o IntegerValueActuator
+DeviceIDVO --o IntegerValueActuator
+IntegerSettingsVO --o IntegerValueActuator
+ValueObject <|.. ActuatorNameVO
+Settings <|.. IntegerSettingsVO
+DomainID <|.. ActuatorIDVO
+DomainID <|.. ActuatorTypeIDVO
+DomainID <|.. DeviceIDVO
+@enduml

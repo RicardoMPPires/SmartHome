@@ -1,0 +1,43 @@
+@startuml
+<style>
+    title {
+      HorizontalAlignment center
+      FontSize 18
+      padding 20
+    }
+</style>
+title Use Case - Add an Actuator to Device\nProcess View Level 3 - Backend Interaction \n Main Success Scenario
+autonumber
+
+!pragma teoz true
+
+box "<<container (C4)>>\n     :Backend" #LightGrey
+  participant "**<<component (C4)>>**\n:Server" as SERVER
+  participant "**<<component (C4)>>**\n:Database" as DB
+end box
+
+
+[o-> SERVER : POST /actuators (actuator information)
+activate SERVER
+SERVER -> DB: Verify if device exists
+activate DB
+DB --> SERVER: Send validation
+deactivate DB
+|||
+SERVER -> SERVER : Verify if device is active
+|||
+SERVER -> DB: Verify if actuator type exists
+activate DB
+DB --> SERVER: Send validation
+deactivate DB
+|||
+SERVER -> SERVER : Create new actuator
+|||
+SERVER -> DB : Save actuator
+activate DB
+DB --> SERVER : Send validation
+deactivate DB
+[o<-- SERVER : new actuator data + HTTP Status
+
+
+@enduml

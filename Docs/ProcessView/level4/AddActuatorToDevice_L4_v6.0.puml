@@ -1,0 +1,88 @@
+@startuml
+
+    title Add Actuator to Device: Main Success Scenario
+    autonumber
+participant ":Router" as R
+participant ":ActuatorCTRLWeb" as C
+participant ":ActuatorMapper" as AM
+participant "actuatorNameVO:ActuatorNameVO" as name
+participant "actuatorTypeIDVO:ActuatorTypeVO" as type
+participant "deviceIdVO:DeviceIDVO" as devId
+participant "settingsVO:SettingsVO" as set
+participant ":ActuatorService" as AS
+participant ":ActuatorTypeRepository" as ATR
+participant ":DeviceRepository" as DR
+participant "device:Device" as D
+participant ":ActuatorFactory" as AF
+participant "actuator : Actuator" as A
+participant ":ActuatorRepository" as AR
+
+[o-> R : POST /actuators
+activate R
+
+R -> C : addActuatorToDevice(actuatorDTO)
+activate C
+
+C -> AM : createActuatorNameVO(actuatorDTO)
+activate AM
+AM -> name** : create(actuatorName)
+AM --> C : **actuatorNameVO**
+deactivate AM
+
+C -> AM : createActuatorTypeVO(actuatorDTO)
+activate AM
+AM -> type** : create(actuatorType)
+AM --> C : **actuatorTypeIDVO**
+deactivate AM
+
+C -> AM : createDeviceID(actuatorDTO)
+activate AM
+AM -> devId** : create(deviceID)
+AM --> C : **deviceIdVO**
+deactivate AM
+
+
+C -> AM : createActuatorSettingsVO(actuatorDTO)
+activate AM
+AM -> set** : create(settings)
+AM --> C : **settingsVO**
+deactivate AM
+
+C -> AS : addActuator(actuatorNameVO, actuatorTypeIDVO, deviceIDVO, settings)
+activate AS
+
+AS -> ATR : isActuatorTypePresent(actuatorTypeIDVO)
+activate ATR
+ATR --> AS : **true**
+deactivate ATR
+
+AS -> DR : findDeviceByID(deviceIDVO)
+activate DR
+DR --> AS : **device**
+deactivate DR
+AS -> D : isActive()
+activate D
+D --> AS : **true**
+deactivate D
+
+AS -> AF : create(actuatorNameVO,  actuatorTypeIDVO, deviceIDVO, settings)
+activate AF
+AF -> A** : create(actuatorNameVO,  actuatorTypeIDVO, deviceIDVO, settings)
+AF --> AS : **actuator**
+deactivate AF
+
+AS -> AR : save(actuator)
+activate AR
+AR --> AS : **true**
+deactivate AR
+AS --> C : **actuator**
+deactivate AS
+C -> AM : domainToDTO(actuator)
+activate AM
+AM --> C : **actuatorDTO**
+deactivate AM
+C --> R : **actuatorDTO, HttpStatus.CREATED**
+deactivate C
+[o<-- R : **actuatorJSON, HttpStatus.CREATED**
+deactivate R
+@enduml

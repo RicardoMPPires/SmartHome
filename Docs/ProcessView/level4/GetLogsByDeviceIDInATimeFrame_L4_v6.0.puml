@@ -1,0 +1,69 @@
+@startuml
+autonumber
+title Use Case Get Logs By Device ID And Time Frame v6.0 - Main Success Scenario
+
+participant ":Router" as R
+participant ":LogCTRLWeb" as C
+participant ":TimeConfigMapper" as TCA
+participant "initialTimeStamp:TimeStampVO" as TSVinit
+participant "finalTimeStamp:TimeStampVO" as TSVfinal
+participant ":DeviceMapper" as DM
+participant "deviceIdVo:DeviceIDVO" as DIV
+participant ":LogService" as LS
+participant ":LogRepository" as LR
+participant ":LogMapper" as LM
+
+
+[o-> R : GET /logs?deviceId={deviceId}
+activate R
+R -> C : getLogByDeviceIDAndTimeFrame(deviceId,timeConfigDTO)
+activate C
+C -> TCA : createInitialTimeStamp(timeConfigDTO)
+activate TCA
+TCA ->  TSVinit** : create(initialDate,initialTime)
+TCA --> C : **initialTimeStamp**
+deactivate TCA
+
+C -> TCA : createFinalTimeStamp(timeConfigDTO)
+activate TCA
+TCA -> TSVfinal** : create(finalDate,finalTime)
+TCA --> C : **finalTimeStamp**
+deactivate TCA
+
+
+C -> DM  : createDeviceID(deviceId)
+activate DM
+DM -> DIV** : create(deviceId)
+DM --> C : **deviceIdVo**
+deactivate DM
+
+C -> LS : findReadingsFromDeviceInATimePeriod(deviceIDVO, initialTimeStamp, finalTimeStamp)
+activate LS
+
+LS -> LS : validateTimeStamps(initialTimeStamp, finalTimeStamp)
+activate LS
+deactivate LS
+
+LS -> LR : findByDeviceIDAndTimeBetween(deviceID, initialTimeStamp, finalTimeStamp)
+activate LR
+LR --> LS : **listOfLogs**
+deactivate LR
+LS --> C : **listOfLogs**
+deactivate LS
+
+C -> LM : domainToDTO(listOfLogs)
+activate LM
+loop for each log in log list
+    LM -> LM : domainToDTO(listOfLogs)
+    activate LM
+    deactivate LM
+end loop
+
+LM --> C : **listOfLogDTO**
+deactivate LM
+C --> R : **listOfLogDTO,HttpStatus.OK**
+deactivate C
+[o<-- R : **listOfLogsJSON,HttpStatus.OK**
+deactivate R
+
+@enduml

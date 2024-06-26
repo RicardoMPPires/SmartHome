@@ -1,0 +1,22 @@
+@startuml
+
+title Use Case - List Existing Devices in a Room \nProcess View Level 1 \nSuccess Scenario
+/'
+As a Room Owner [or Power User, or Administrator], I want to get a list of all
+devices in a room.
+'/
+autonumber
+
+actor "Room Owner" as RO
+participant "**<<system (C4)>>**\nSmartHome" as SH
+
+
+RO -> SH: I want to get a list of all devices in this room
+activate RO
+activate SH
+SH --> RO: Provide a list of all devices in the room
+deactivate SH
+deactivate RO
+
+
+@enduml

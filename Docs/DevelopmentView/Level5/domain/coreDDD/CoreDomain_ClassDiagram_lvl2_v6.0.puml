@@ -1,0 +1,162 @@
+@startuml
+title Domain Class Diagram - Core Domain\nSystem / BackEnd / Domain\n(Implementation View Level 4 - 2nd Granularity)
+
+skinparam linetype ortho
+
+class House {
+- locationVO: LocationVO
++ House(locationVO: LocationVO): House
++ House(houseID: HouseIDVO, \nlocationVO: LocationVO): House
++ configureLocation(locationVO: LocationVO): boolean
++ getLocation(): LocationVO
++ getHouseId(): HouseIDVO
+}
+
+class HouseIDVO {
+- identifier: UUID
+}
+
+class Room {
+- roomName: RoomNameVO
+- floor: RoomFloorVO
+- roomDimensions: RoomDimensionsVO
+- houseID: HouseIDVO
++ Room(roomName: RoomNameVO, floor: RoomFloorVO, \nroomDimensions: RoomDimensionsVO, houseID: HouseIDVO): Room
++ Room(roomID: RoomIDVO, roomName: RoomNameVO, floor: RoomFloorVO, \nroomDimensions: RoomDimensionsVO, houseID: HouseIDVO): Room
++ getRoomName(): RoomNameVO
++ getFloor(): RoomFloorVO
++ getRoomDimensions(): RoomDimensionsVO
++ getHouseID(): HouseIDVO
++ getId(): RoomIDVO
+}
+
+class RoomIDVO {
+- identifier: UUID
+}
+
+class Device {
+- deviceModel: DeviceModelVO
+- roomID: RoomIDVO
+- deviceStatus: DeviceStatusVO
+- deviceID: DeviceIDVO
++ Device(deviceName: DeviceNameVO, deviceModel: DeviceModelVO, \nroomID: RoomIDVO): Device
++ Device(deviceIDVO: DeviceIDVO, deviceName: DeviceNameVO, \ndeviceModel: DeviceModelVO, deviceStatus: DeviceStatusVO, \nroomID: RoomIDVO): Device
++ deactivateDevice(): boolean
++ getDeviceName(): DeviceNameVO
++ getDeviceModel(): DeviceModelVO
++ getDeviceStatus(): DeviceStatusVO
++ getRoomID(): RoomIDVO
++ getId(): DeviceIDVO
++ isActive(): boolean
+}
+
+class DeviceIDVO {
+- identifier: UUID
+}
+
+interface Sensor {
+- sensorName: SensorNameVO
+- sensorTypeID: SensorTypeIDVO
+- deviceID: DeviceIDVO
++ getSensorTypeID(): SensorTypeIDVO
++ getDeviceID(): DeviceIDVO
++ getSensorName(): SensorNameVO
+}
+
+class SensorIDVO {
+- identifier: UUID
+}
+
+interface Actuator {
+- actuatorName: ActuatorNameVO
+- actuatorTypeID: ActuatorTypeIDVO
+- deviceIDVO: DeviceIDVO
+- settings: SettingsVO
++ getActuatorTypeID(): ActuatorTypeIDVO
++ getDeviceID(): DeviceIDVO
++ getActuatorName(): ActuatorNameVO
++ getLowerLimit(): String
++ getUpperLimit(): String
++ getPrecision(): String
+}
+
+class ActuatorIDVO {
+- identifier: UUID
+}
+
+class SensorType {
+- sensorUnit: UnitVO
++ SensorType(sensorTypeID: SensorTypeIDVO, sensorUnit: UnitVO): SensorType
++ getId(): SensorTypeIDVO
++ getUnit(): UnitVO
+}
+
+class SensorTypeIDVO {
+- sensorTypeID: String
+}
+
+class ActuatorType {
++ ActuatorType(actuatorTypeIDVO: ActuatorTypeIDVO): ActuatorType
++ getId(): ActuatorTypeIDVO
+}
+
+class ActuatorTypeIDVO {
+- actuatorTypeID: String
+}
+
+class Log {
+- time: TimeStampVO
+- reading: SensorValueObject<?>
+- sensorID: SensorIDVO
+- deviceID: DeviceIDVO
+- sensorTypeID: SensorTypeIDVO
++ Log(reading: SensorValueObject<?>, sensorID: SensorIDVO, \ndeviceID: DeviceIDVO, sensorTypeID SensorTypeIDVO): Log
++ Log(logID: LogIDVO, time: TimeStampVO, reading: SensorValueObject<?>, \nsensorID: SensorIDVO, deviceID: DeviceIDVO, sensorTypeID: SensorTypeIDVO): Log
++ getId(): DoaminID
++ getReading(): SensorValueObject<?>
++ getSensorID(): SensorIDVO
++ getDeviceID(): DeviceIDVO
++ getSensorTypeID(): SensorTypeIDVO
++ getTime(): TimeStampVO
+}
+
+class LogIDVO {
+- identifier: UUID
+}
+
+interface Repository {
++ save(T entity): boolean
++ findAll(): Iterable<T>
++ findById(ID id): T
++ isPresent(ID id): boolean
+}
+
+House "1" *--down "1" HouseIDVO
+Room "1" *--down "1" RoomIDVO
+Device "1" *--down "1" DeviceIDVO
+Sensor "*" *--down "1" SensorIDVO
+Actuator "*" *--down "1" ActuatorIDVO
+SensorType "1" *--down "1" SensorTypeIDVO
+ActuatorType "1" *--down "1" ActuatorTypeIDVO
+Log "1" *--right "1" LogIDVO
+
+Repository "1" *--down "*" House
+Repository "1" *--down "*" Room
+Repository "1" *--down "*" Device
+Repository "1" *--down "*" Sensor
+Repository "1" *--down "*" Actuator
+Repository "1" *--down "*" SensorType
+Repository "1" *--down "*" ActuatorType
+Repository "1" *--down "*" Log
+
+Room ..> HouseIDVO: has
+Device ..> RoomIDVO: has
+Sensor ..> DeviceIDVO: has
+Actuator ..down> DeviceIDVO: has
+Sensor ..right> SensorTypeIDVO: has
+Actuator ..right> ActuatorTypeIDVO: has
+Log ..down> SensorIDVO: has
+Log ..down> DeviceIDVO: has
+Log ..right> SensorTypeIDVO: has
+
+@enduml

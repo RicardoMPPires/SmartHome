@@ -1,0 +1,90 @@
+@startuml
+title <size: 30> WindSensor v6.1\n<size: 25>Development view level 5 - class diagram
+
+note "<b>Only methods related to Wind \n<b> Sensor are represented" as 1
+
+skinparam linetype ortho
+
+interface Sensor {
+    + getSensorTypeID() : SensorTypeIDVO
+    + getDeviceID() : DeviceIDVO
+    + getSensorName() : SensorNameVO
+}
+
+class SensorIDVO {
+    - indentifier : UUID
+    + SensorIDVO(identifier : UUID) : SensorIDVO
+}
+
+class SensorNameVO {
+    - sensorName : String
+    + SensorNameVO(sensorName : String) : SensorNameVO
+    + getValue() : String
+}
+
+class SensorTypeIDVO {
+    - sensorTypeID : String
+    + SensorTypeIDVO(sensorTypeID : String) : SensorTypeIDVO
+}
+
+class DeviceIDVO {
+    - deviceID : UUID
+    + DeviceIDVO(deviceID : UUID) : DeviceIDVO
+}
+
+interface DomainID {
+    + getID() : String
+}
+
+interface ValueObject<T> {
+    + getValue() : T
+}
+
+class WindSensor {
+    - sensorID : SensorIDVO
+    - sensorName : SensorNameVO
+    - sensorTypeID : SensorTypeIDVO
+    - deviceID : DeviceIDVO
+    + WindSensor(sensorName : SensorNameVO, deviceID : DeviceIDVO, sensorTypeID : SensorTypeIDVO) : WindSensor
+    + getReading(ExternalServices externalServices) : ValueObject<String[]>
+}
+
+class WindValue {
+   - windSpeed : String
+   - windDirection : String
+   - permittedDirections : String[]
+
+   + WindValue(reading : String) : WindValue
+   + getValue() : String[]
+   - isReadingValid(reading : String) : boolean
+}
+
+
+interface AggregateRoot{
+    + getID() : DomainID
+}
+
+interface ExternalService{
+    + getValue() : String
+}
+
+class SimHardware{
+}
+
+
+WindSensor o---down SensorIDVO
+WindSensor o-- SensorTypeIDVO
+WindSensor o-- DeviceIDVO
+WindSensor o--left SensorNameVO
+SensorIDVO -down..|> DomainID
+SensorTypeIDVO -down..|> DomainID
+DeviceIDVO -down..|> DomainID
+SensorNameVO -left..|> ValueObject
+WindValue -up..|> ValueObject
+WindSensor -left..> WindValue
+WindSensor -up..|> Sensor
+Sensor -right--|>AggregateRoot
+WindSensor ..> SimHardware
+SimHardware -down.|> ExternalService
+
+@enduml

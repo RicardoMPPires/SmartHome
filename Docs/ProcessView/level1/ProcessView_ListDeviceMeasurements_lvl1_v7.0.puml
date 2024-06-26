@@ -1,0 +1,17 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+title Use Case - List All Device Measurements\nProcess View Level 1 \n Success Scenario
+autonumber
+
+actor "Room Owner" as RO
+participant "**<<system (C4)>>**\nSmartHome" as SH
+
+RO -> SH : I want to get this device readings
+activate RO
+activate SH
+SH --> RO : Provide a list of all device readings
+deactivate SH
+deactivate RO
+
+@enduml

@@ -1,0 +1,31 @@
+@startuml
+title : Physical View - Level 2
+
+skinparam linetype ortho
+
+node "localhost:" as N1  {
+  component "<<component>>\nBrowser" as B  {
+    [WEB_UI]
+  }
+}
+
+node "VM_DEI_1" as VM1  {
+  component "<<component>>\nServer_2\n10.9.24.206:8080" as S2  {
+      [Back-End]
+  }
+  component "<<component>>\nServer_1\n10.9.24.206:81" as S1  {
+    [Front-End]
+  }
+}
+
+node "VM_DEI_2\nDocker" as VM2 {
+  component "<<component>>\nServer_3\nvs1265.dei.isep.ipp.pt:3306" as S3  {
+    [MariaDB]
+  }
+}
+
+B #-right-# S1 : http/s
+S1 #-right-# S2 : http/s
+S2 #--# S3 : jdbc
+
+@enduml

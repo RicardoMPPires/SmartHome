@@ -1,0 +1,250 @@
+@startuml
+
+title <size: 30> Use Case - Get Peak Power Consumption
+
+note "<b>- Only methods related to 'get peak power consumption \n<b>difference in a given period' use case are represented.\n<b>- Only the several implementations of LogRepository are representated\n<b>(i.e. RoomRepository and DeviceRepository implementation types were omitted.\n<b>- TimeStampVO implements ValueObject interface, this relation is abstracted to improve diagram readability" as N1
+
+skinparam linetype ortho
+
+
+LogCTRLWeb .up.> TimeConfigMapper
+    LogCTRLWeb ..> TimeConfigDTO
+    TimeConfigMapper -- TimeStampVO : <create> >
+    TimeConfigMapper -- DeltaVO : <create> >
+
+
+
+LogCTRLWeb ..> LogService
+    LogServiceImpl ..|> LogService
+    LogServiceImpl ..> LogRepository
+
+LogRepository .up.|> Repository
+LogRepositoryJPA .up.|> LogRepository
+    LogRepositoryJPA ..> EntityManagerFactory
+    LogFactoryImpl .up.|> LogFactory
+
+
+ILogRepositorySpringData .up.|> LogRepository
+    LogRepositorySpringData ..|> ILogRepositorySpringData
+    LogRepositorySpringData ..> LogAssembler
+
+ILogRepositorySpringData ..|> JpaRepository
+
+LogAssembler ..> LogFactory
+LogAssembler ..> SensorValueFactory
+EnergyConsumptionValue ....|> SensorValueObject
+SensorValueFactoryImpl -- EnergyConsumptionValue : <create> >
+LogFactoryImpl -- Log : <create> >
+LogAssembler ..> LogDataModel
+
+Log "1" -- "1" LogIDVO
+Log  -left- "1" SensorValueObject :  > <has>
+Log "1" -- "1" SensorIDVO
+Log "1" -- "1" DeviceIDVO
+Log "1" -- "1" SensorTypeIDVO
+
+Log ...|> AggregateRoot
+
+DomainID <|.up. DeviceIDVO
+DomainID <|.up. LogIDVO
+DomainID <|.up. SensorIDVO
+DomainID <|.up. SensorTypeIDVO
+ValueObject <|.up. SensorValueObject
+
+SensorValueFactoryImpl ..|> SensorValueFactory
+
+interface JpaRepository<T>
+
+interface EntityManagerFactory
+
+interface Repository<T> {
+    + save(entity : T) : boolean
+    + findAll() : Iterable<T>
+    + findByID(ID : DomainID) : T
+    + isPresent(ID : DomainID) : boolean
+}
+
+
+interface LogRepository {
+
+    + findByDeviceIDAndSensorTypeAndTimeBetween(deviceID : String, sensorType : String, start : TimeStampVO, end : TimeStampVO) : Iterable<Log>
+    + findByNegativeRedingAndNotDeviceIDAndSensorTypeAndTimeBetween(deviceID : String, sensorType : String, start : TimeStampVO, end : TimeStampVO) : Iterable<Log>
+
+
+
+}
+
+class LogRepositoryJPA{
+    - logFactory : LogFactory
+    - sensorValueFactory : SensorValueFactory
+    - entityManagerFactory : EntityManagerFactory
+
+    + LogRepositoryJPA(logFactory : LogFactory, sensorValueFactory : SensorValueFactory, \nentityManagerFactory : EntityManagerFactory)
+    + findByDeviceIDAndSensorTypeAndTimeBetween(deviceID : String, sensorType : String, start : TimeStampVO, end : TimeStampVO) : Iterable<Log>
+    + findByNegativeRedingAndNotDeviceIDAndSensorTypeAndTimeBetween(deviceID : String, sensorType : String, start : TimeStampVO, end : TimeStampVO) : Iterable<Log>
+
+class LogRepositorySpringData{
+    - iLogRepositorySpringData : ILogRepositorySpringData
+    - logFactory : LogFactory
+    - sensorValueFactory : SensorValueFactory
+
+    + LogRepositorySpringData(iLogRepositorySpringDat : ILogRepositorySpringData, logFactory : LogFactory, sensorValueFactory : SensorValueFactory)
+    + findByDeviceIDAndSensorTypeAndTimeBetween(deviceID : String, sensorType : String, start : TimeStampVO, end : TimeStampVO) : Iterable<Log>
+    + findByNegativeRedingAndNotDeviceIDAndSensorTypeAndTimeBetween(deviceID : String, sensorType : String, start : TimeStampVO, end : TimeStampVO) : Iterable<Log>
+
+
+interface LogFactory{
+    + createLog(logID : LogIDVO, time : LocalDateTime, reading : SensorValueObject<?>, \nsensorID : SensorIDVO, deviceID : DeviceIDVO, sensorTypeID : SensorTypeIDVO) : Log
+}
+
+class LogFactoryImpl{
+    + createLog(logID : LogIDVO, time : LocalDateTime, reading : SensorValueObject<?>, \nsensorID : SensorIDVO, deviceID : DeviceIDVO, sensorTypeID : SensorTypeIDVO) : Log
+}
+
+
+
+interface LogService {
+    + getPeakPowerConsumption(start : TimeStampVO, end : TimeStampVO, delta : DeltaVO) : String
+}
+
+class LogServiceImpl {
+    - logRepository : LogRepository
+    - deviceRepository : DeviceRepository
+    - roomRepository : RoomRepository
+
+    + LogServiceImpl(logRepository : LogRepository,\n deviceRepository : DeviceRepository, roomRepository : RoomRepository)
+
+    + getPeakPowerConsumption(start : TimeStampVO, end : TimeStampVO, delta : DeltaVO) : String
+    }
+
+class LogCTRLWeb {
+    - logService : LogService
+
+    + LogCTRLWeb(logService : LogService)
+
+    + getPeakPowerConsumption(TimeConfigDTO : @RequestBody) : ResponseEntity<String>
+}
+
+class DeviceIDVO {
+    - identifier : UUID
+
+    + DeviceIDVO(identifier : UUID)
+}
+
+class SensorIDVO {
+  - identifier : UUID
+
+    + SensorIDVO(identifier : UUID)
+    }
+
+class SensorTypeIDVO {
+  - identifier : UUID
+
+    + SensorTypeIDVO(sensorType : String)
+    }
+
+class LogIDVO {
+  - identifier : UUID
+
+    + LogIDVO(identifier : UUID)
+    }
+
+
+class TimeConfigMapper{
+    - TimeConfigMapper()
+
+    + createDeltaVO((timeConfigDTO : TimeConfigDTO) : DeltaVO
+    + createInitialTimeStamp(timeConfigDTO : TimeConfigDTO) : TimeStampVO
+    + createFinalTimeStamp(timeConfigDTO : TimeConfigDTO) : TimeStampVO
+}
+
+class TimeStampVO{
+    - timeStamp : LocalDateTime
+
+    + TimeStampVO(localDateTime : LocalDateTime)
+}
+
+
+class TimeConfigDTO{
+    - initialDate : String
+    - initialTime : String
+    - endDate : String
+    - endTime : String
+    - deltaMin : String
+
+}
+
+
+class LogDataModel {
+    - logID : String
+    - time : LocalDateTime
+    - reading : String
+    - sensorID : String
+    - deviceID : String
+    - sensorTypeID : String
+
+    + LogDataModel()
+
+    + LogDataModel(log : Log)
+}
+
+class LogAssembler {
+    + toDomain(logFactory : LogFactory, valueFactory : SensorValueFactory, logDataModel : LogDataModel)
+
+    + toDomain(logFactory : LogFactory, valueFactory : SensorValueFactory, \nlogDataModelList : Iterable<LogDataModel>) : Iterable<Log>
+}
+
+class Log{
+    - logID : LogIDVO
+    - readingTime : LocalDateTime
+    - reading : SensorValueObject<?>
+    - sensorID : SensorIDVO
+    - deviceID : DeviceIDVO
+    - sensorTypeID : SensorTypeIDVO
+
+    + Log(reading : SensorValueObject<?>, sensorID : SensorIDVO, \ndeviceID : DeviceIDVO, sensorTypeID : SensorTypeIDVO)
+
+    + Log(logID : LogIDVO, readingTime : LocalDateTime, reading SensorValueObject<?>, sensorID : SensorIDVO, \ndeviceID : DeviceIDVO, sensorTypeID : SensorTypeIDVO)
+
+}
+
+class EnergyConsumptionValue{
+    - value : int
+    + EnergyConsumptionValue(reading : String)
+    + getValue() : Integer
+
+    - validateReading(reading : String) : boolean
+}
+
+interface SensorValueObject<T>
+
+interface ValueObject<T>{
+    + T getValue()
+}
+
+class DeltaVO{
+    - delta : int
+    - DEFAULT : int
+
+    + DeltaVO(delta : String)
+    - definedDelta(delta : int) : String
+}
+
+interface DomainID {
+    + getID() : String
+}
+
+
+interface AggregateRoot {
+    + getID() : DomainID
+}
+
+interface ILogRepositorySpringData{
+    + findByDeviceIDAndSensorTypeAndTimeBetween(deviceID : String, sensorType : String, start : TimeStampVO, end : TimeStampVO) : Iterable<Log>
+    + findByNegativeRedingAndNotDeviceIDAndSensorTypeAndTimeBetween(deviceID : String, sensorType : String, start : TimeStampVO, end : TimeStampVO) : Iterable<Log>
+    }
+
+interface LogFactory
+
+interface SensorValueFactory
+@enduml

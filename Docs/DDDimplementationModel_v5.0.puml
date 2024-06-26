@@ -1,0 +1,131 @@
+@startuml
+title <size: 30> DDD Implementation Model v5.0
+note "<b>This diagram presents the DDD approach to the \n<b>project. Methods are abstracted for readability." as n1
+skinparam linetype ortho
+
+top to bottom direction
+
+package HouseAggregate {
+    class House <<Root>> <<Entity>>{}
+    class Location <<VO>>{}
+    class GPS <<VO>>{}
+    class Address <<VO>>{}
+    class Door <<VO>>{}
+    class Street <<VO>>{}
+    class City <<VO>>{}
+    class Country <<VO>>{}
+    class PostalCode <<VO>>{}
+    class Longitude <<VO>>{}
+    class Latitude <<VO>>{}
+}
+
+class HouseID <<VO>> <<Identity>>{}
+
+package RoomAggregate {
+    class Room <<Root>> <<Entity>>{}
+    class RoomName <<VO>>{}
+    class Floor <<VO>>{}
+    class Dimensions <<VO>>{}
+    class Width <<VO>>{}
+    class Length <<VO>>{}
+    class Height <<VO>>{}
+}
+
+class RoomID <<VO>> <<Identity>>{}
+
+package DeviceAggregate {
+    class Device <<Root>> <<Entity>>{}
+    class DeviceName <<VO>>{}
+    class DeviceModel <<VO>>{}
+    class Status <<VO>>{}
+}
+
+class DeviceID <<VO>> <<Identity>>{}
+
+package SensorAggregate {
+    interface Sensor <<Root>> <<Entity>>{}
+    class SensorName <<VO>>{}
+}
+
+class SensorID <<VO>> <<Identity>>{}
+
+package ActuatorAggregate {
+    interface Actuator <<Root>> <<Entity>>{}
+    class ActuatorName <<VO>>{}
+    Interface Settings <<VO>>{}
+}
+
+class ActuatorID <<VO>> <<Identity>>{}
+
+package SensorTypeAggregate {
+    class SensorType <<Root>> <<Entity>>{}
+    class Unit <<VO>>
+}
+
+class SensorTypeID <<VO>> <<Identity>>{}
+
+package ActuatorTypeAggregate {
+    class ActuatorType <<Root>> <<Entity>>{}
+}
+
+class ActuatorTypeID <<VO>> <<Identity>>{}
+
+package LogAggregate {
+    class Log<<root>> <<Entity>>{}
+    class Reading<<VO>>{}
+}
+
+class LogID <<VO>> <<Identity>>{}
+
+Room --|> RoomName
+Room --|> Floor
+Room --left|> HouseID
+Room --|> Dimensions
+Dimensions --|> Width
+Dimensions --|> Length
+Dimensions --|> Height
+Room --right RoomID
+
+House --|> Location
+House -- HouseID
+Location --|> Address
+Location --left|> GPS
+Address --|> Door
+Address --|> Street
+Address --|> City
+Address --|> Country
+Address --|> PostalCode
+GPS --up|> Latitude
+GPS --left|> Longitude
+
+Device --up|> DeviceName
+Device --up|> DeviceModel
+Device ---right DeviceID
+Device --up Status
+Device --|> RoomID
+
+Sensor --up|> SensorName
+Sensor -- SensorID
+Sensor ----down|> DeviceID
+Sensor --|> SensorTypeID
+
+Actuator --up|> ActuatorName
+Actuator -- ActuatorID
+Actuator ----up|> DeviceID
+Actuator --|> ActuatorTypeID
+Actuator --|> Settings
+Note bottom of Settings: Optional
+
+SensorType -- SensorTypeID
+SensorType --|> Unit
+
+ActuatorType -- ActuatorTypeID
+
+Log --|> SensorID
+Log --|> SensorTypeID
+Log --left|> DeviceID
+Log -- LogID
+Log --UP|> Reading
+
+@enduml
+

@@ -1,0 +1,248 @@
+@startuml
+
+title <size: 30> Use Case: Define Location v6.0\n Development view level 5- class diagram
+
+note "<b>Only methods related to 'define \n<b>location' use case are represented" as N1
+
+note "<b>For the sake of readability some entities where not represented" as N2
+
+skinparam linetype ortho
+
+class House {
+    - houseID : HouseIDVO
+    - location : LocationVO
+
+    + House(locationVO : LocationVO)
+    + configureLocation(locationVO : LocationVO) : boolean
+}
+
+interface AggregateRoot {
+    + getId() : DomainID
+}
+
+class HouseMapper {
+    + dtoToDomain(locationDTO : LocationDTO) : LocationVO
+}
+
+class LocationDTO {
+    - door : String
+    - street : String
+    - city : String
+    - country : String
+    - postalCode : String
+    - latitude : double
+    - longitude : double
+
+class LocationVO {
+    - addressVO : AddressVO
+    - gpsVO : GpsVO
+
+    + LocationVO(addressVO : AddressVO, gpsVO : GpsVO)
+}
+
+class AddressVO {
+    - doorVO : DoorVO
+    - streetVO : StreetVO
+    - cityVO : CityVO
+    - countryVO : CountryVO
+    - postalCodeVO : PostalCodeVO
+
+    + AddressVO(doorVO : DoorVO, streetVO : StreetVO, cityVO : CityVO, countryVO : CountryVO, postalCodeVO : PostalCodeVO)
+}
+
+class DoorVO {
+    - door : String
+
+    + DoorVO(door : String)
+}
+
+class StreetVO {
+    - street : String
+
+    + StreetVO(street : String)
+}
+
+class CityVO {
+    - city : String
+
+    + CityVO(city : String)
+}
+
+class CountryVO {
+    - country : String
+
+    + CountryVO(country : String)
+}
+
+class PostalCodeVO {
+    - postalCode : String
+
+    + PostalCodeVO(postalCode : String)
+}
+
+class GPSVO {
+    - latitude : LatitudeVO
+    - longitude : LongitudeVO
+
+    + GPSVO(latitude : LatitudeVO, longitude : LongitudeVO)
+}
+
+class LatitudeVO {
+    - latitude : double
+
+    + LatitudeVO(latitude : double)
+}
+
+class LongitudeVO {
+    - longitude : double
+
+    + LongitudeVO(longitude : double)
+}
+
+class HouseRepositoryMem {
+    - data : LinkedHashMap<HouseIDVO, House>
+
+    + isPresent(id : HouseIDVO) : boolean
+    + getFirstHouse() : Optional<House>
+    + getFirstHouseIDVO() : HouseIDVO
+    + update(entity : House) : boolean
+}
+
+class HouseRepositoryJPA {
+    - houseFactory : HouseFactory
+    - entityManagerFactory : EntityManagerFactory
+    - QUERY : String
+
+    + HouseRepositoryJPA(houseFactory : HouseFactory,entityManagerFactory : EntityManagerFactory)
+    + isPresent(id : HouseIDVO) : boolean
+    + update(house : House) : boolean
+    + getFirstHouse() : Optional<House>
+    + getFirstHouseIDVO() : HouseIDVO
+
+}
+
+interface IHouseRepositorySpringData {
+
+}
+
+class HouseRepositorySpringData {
+    - houseFactory : HouseFactory
+    - iHouseRepositorySpringData : IHouseRepositorySpringData
+
+    + HouseRepositorySpringData(houseFactory : HouseFactory,houseRepository : IHouseRepositorySpringData)
+    + isPresent(id : HouseIDVO) : boolean
+    + getFirstHouseIDVO() : HouseIDVO
+    + update(house : House) : boolean
+    + getFirstHouse() : Optional<House>
+
+}
+
+interface HouseRepository {
+    + getFirstHouse() : House
+    + getFirstHouseIDVO() : HouseIDVO
+    + update(house : House) : boolean
+}
+
+class HouseServiceImpl {
+    - houseRepository : HouseRepository
+    - houseFactory : HouseFactory
+
+    + HouseServiceImpl(houseRepository : HouseRepository, houseFactory : HouseFactory)
+    + updateLocation(locationVO : LocationVO) : Optional<House>
+    + getFirstHouse() : Optional<House>
+
+}
+
+interface HouseService {
+    + getFirstHouse() : Optional<House>
+    + updateLocation(locationVO : LocationVO) : boolean
+}
+
+class HouseFactoryImpl {
+    + createHouse(houseIDVO : HouseIDVO,locationVO : LocationVO) : House
+
+}
+
+interface HouseFactory {
+    + createHouse(houseID : HouseIDVO,locationVO : LocationVO) : House
+}
+
+class ConfigureLocationCTRL {
+    - houseService : HouseService
+
+    + ConfigureLocationCTRL(houseService : HouseService)
+    + updateLocation(locationDTO : LocationDTO) : boolean
+}
+
+class HouseWEBCtrl{
+    - houseService : HouseService
+
+    + HouseWEBCtrl(houseService : HouseService)
+    + configureLocation(locationDTO : LocationDTO) : ResponseEntity<HouseDTO>
+}
+
+interface Repository {
+
+    + isPresent(id : ID) : boolean
+}
+
+class HouseAssembler {
+    + toDomain(houseFactory : HouseFactory, houseDataModel : HouseDataModel) : House
+}
+
+class HouseDataModel {
+    - door : String
+    - street : String
+    - city : String
+    - country : String
+    - postalCode : String
+    - latitude : double
+    - longitude : double
+
+    + HouseDataModel(house : House) : HouseDataModel
+    + updateFromDomain(house : House) : boolean
+
+}
+
+
+ConfigureLocationCTRL .> HouseService
+HouseWEBCtrl .> HouseService
+HouseWEBCtrl .> HouseMapper
+ConfigureLocationCTRL .up> HouseMapper
+HouseMapper ..left> LocationDTO
+HouseService ..up> HouseFactory
+HouseFactoryImpl -.left|> HouseFactory
+HouseService .down> HouseRepository
+HouseService <|.down- HouseServiceImpl
+
+HouseService -down.> HouseRepositoryMem
+HouseService -down.> HouseRepositoryJPA
+
+HouseRepositoryMem --right.|> HouseRepository
+HouseRepositoryJPA --left.|> HouseRepository
+HouseRepositorySpringData --up.|> HouseRepository
+
+HouseRepositorySpringData ..> IHouseRepositorySpringData
+
+HouseRepository -down.|> Repository
+House -up.|> AggregateRoot
+
+House --up-o HouseRepository
+
+House *-- LocationVO
+
+HouseRepositoryJPA ..> HouseDataModel
+HouseRepositoryJPA ..> HouseAssembler
+
+LocationVO "1" *-- "1" AddressVO
+LocationVO "1" *-- "1" GPSVO
+AddressVO "1" *-- "1" DoorVO
+AddressVO "1" *-- "1" StreetVO
+AddressVO "*" *-- "1" CityVO
+AddressVO "1" *-- "1" CountryVO
+AddressVO "1" *-- "1" PostalCodeVO
+GPSVO "1" *-- "1" LatitudeVO
+GPSVO "1" *-- "1" LongitudeVO
+
+
+@enduml

@@ -1,0 +1,84 @@
+@startuml
+title <size: 30> AveragePowerConsumptionSensor v6.1\n<size: 25>Development view level 5 - class diagram
+
+note "<b>Only methods related to Average Power \n<b>Consumption Sensor are represented" as 1
+
+skinparam linetype ortho
+
+interface Sensor {
+    + getSensorTypeID() : SensorTypeIDVO
+    + getDeviceID() : DeviceIDVO
+}
+
+class SensorIDVO {
+    - indentifier : UUID
+    + SensorIDVO(identifier : UUID) : SensorIDVO
+}
+
+class SensorNameVO {
+    - sensorName : String
+    + SensorNameVO(sensorName : String) : SensorNameVO
+    + getValue() : String
+}
+
+class SensorTypeIDVO {
+    - sensorTypeID : String
+    + SensorTypeIDVO(sensorTypeID : String) : SensorTypeIDVO
+}
+
+class DeviceIDVO {
+    - deviceID : UUID
+    + DeviceIDVO(deviceID : UUID) : DeviceIDVO
+}
+
+interface DomainID {
+    + getID() : String
+}
+
+interface ValueObject<T> {
+    + getValue() : T
+}
+
+class AveragePowerConsumptionSensor {
+    - sensorID : SensorIDVO
+    - sensorName : SensorNameVO
+    - sensorTypeID : SensorTypeIDVO
+    - deviceID : DeviceIDVO
+    + AveragePowerConsumptionSensor(sensorName : SensorNameVO,\n deviceID : DeviceIDVO,\n sensorTypeID : SensorTypeIDVO) : AveragePowerConsumptionSensor
+    + getReading(initialDate : String,\n finalDate : String,\n simHardware : SimHardware) : ValueObject<Integer>
+}
+
+class AveragePowerConsumptionValue {
+    - averagePowerConsumption : int
+    + AveragePowerConsumptionValue(reading : String)\n : AveragePowerConsumptionValue
+    + getValue() : Integer
+}
+
+class SimHardware {
+    + getValue(initialDate : String, finalDate : String) : String
+}
+
+interface SensorExternalServices {
++ getValue(initialDate : String, finalDate : String) : String
+}
+
+interface AggregateRoot{
+    + getID() : DomainID
+}
+
+AveragePowerConsumptionSensor o-- SensorIDVO
+AveragePowerConsumptionSensor o-- SensorTypeIDVO : <<has>>
+AveragePowerConsumptionSensor o-- DeviceIDVO : <<has>>
+AveragePowerConsumptionSensor o-- SensorNameVO : <<has>>
+SensorIDVO -down..|> DomainID
+SensorTypeIDVO -down..|> DomainID
+DeviceIDVO -down..|> DomainID
+SensorNameVO -left..|> ValueObject
+AveragePowerConsumptionValue -up..|> ValueObject
+AveragePowerConsumptionSensor -left..> AveragePowerConsumptionValue : <<creates>>
+AveragePowerConsumptionSensor -right..> SimHardware : <<uses>>
+AveragePowerConsumptionSensor -up..|> Sensor
+Sensor -right--|>AggregateRoot
+SimHardware -up.|> SensorExternalServices
+
+@enduml

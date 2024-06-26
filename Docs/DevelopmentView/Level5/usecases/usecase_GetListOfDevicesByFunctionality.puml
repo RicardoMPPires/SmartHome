@@ -1,0 +1,176 @@
+@startuml
+title <size: 30> Use Case: Get List of Devices By Functionality v6.0\n Development view level 5- class diagram
+note "<b>Only methods related to\n<b>US09 are represented" as N1
+skinparam linetype ortho
+
+class DeviceCTRLWeb {
+    - deviceService : DeviceService
+
+    + getDevicesByFunctionality() : Map<str, DeviceDTO>
+}
+
+
+
+class GetListOfDevicesByFunctionalityCtrl{
+    - deviceService : DeviceService
+
+    + getListOfDevicesByFunctionality() : LinkedHashMap<String, List<DeviceDTO>>
+}
+
+class DeviceServiceImpl {
+    - roomRepository : RoomRepository
+    - deviceFactory : DeviceFactory
+    - deviceRepository : Device DeviceRepository
+    - sensorRepository : SensorRepository
+    - actuatorRepository : actuatorRepository
+    - NOT_PRESENT_MESSAGE : String
+
+    + DeviceServiceImpl(roomRepository : RoomRepository, deviceFactory : DeviceFactory, deviceRepository : Device DeviceRepository, sensorRepository : SensorRepository, actuatorRepository : actuatorRepository)
+    + getListOfDeviceByFunctionality() : Map<String, List<Device>>
+    - getMapDeviceIDBySensorType() : LinkedHashMap<String, List<DeviceIDVO>>
+    - getMapDeviceIDBySensorAndActuatorType() : LinkedHashMap<String,List<DeviceIDVO>>
+    - mergeMaps (map1 : LinkedHashMap<String,List<DeviceIDVO>>, map2 : LinkedHashMap<String,List<DeviceIDVO>>) : LinkedHashMap<String,List<DeviceIDVO>>
+    - getDevices (map: Map<String, List<DeviceIDVO>>  : LinkedHashMap<String, List<Device>>
+    - updateMap (map : LinkedHashMap<String,List<DeviceIDVO>>, type : String, deviceID : DeviceIDVO) : LinkedHashMap<String,List<DeviceIDVO>>
+}
+
+          interface DeviceService {
+                    + getListOfDevicesByFunctionality() : Map<String, List<Device>>
+}
+
+interface SensorRepository {
+
+}
+
+class Sensor {
+    - sensorTypeID : SensorTypeIDVO
+    - deviceIDVO : DeviceIDVO
+    + getSensorTypeID().getID() : String
+    + getDeviceID() : DeviceIDVO
+}
+
+interface ActuatorRepository {
+
+}
+
+class Actuator {
+    - actuatorTypeID : actuatorTypeIDVO
+    - deviceIDVO : DeviceIDVO
+    + getActuatorTypeID().getID() : String
+    + getDeviceID() : DeviceIDVO
+}
+
+interface DeviceRepository {
+
+                 }
+ class DeviceRepositoryJPA {
+                     - deviceFactory : DeviceFactory
+                     - entityManagerFactory : EntityManagerFactory
+                     - QUERY : String
+
+                     + findAll () : Iterable<Device>
+                 }
+
+interface IDeviceRepositorySpringData {
+
+}
+
+class DeviceRepositorySpringData {
+                     - deviceFactory : DeviceFactory
+                     - iDeviceRepositorySpringData : IDeviceRepositorySpringData
+
+                     + findAll() : Iterable<Device>
+
+                 }
+
+
+
+class DeviceDataModel {
+    - deviceID : String
+    - deviceName : String
+    - deviceModel : String
+    - deviceStatus : String
+    - roomID : String
+
+    DeviceDataModel()
+    + DeviceDataModel(device : Device) : DeviceDataModel
+    + getDeviceID() : String
+    + getDeviceName() : String
+    + getDeviceModel() : String
+    + getDeviceStatus() : String
+    + getRoomID() : String
+
+}
+
+class DeviceAssembler {
+                     + toDomain(deviceFactory : DeviceFactory, deviceDataModel : DeviceDataModel) : Device
+                     + toDomainList(deviceFactory : DeviceFactory, deviceDataModelList : Iterable<DeviceDataModel>) : List<Device>
+                 }
+
+ class Device{
+                     - deviceName : DeviceNameVO
+                     - deviceModel : DeviceModelVO
+                     - roomID : RoomIDVO
+                     - deviceStatus : DeviceStatusVO
+                     - deviceID : DeviceIDVO
+
+                     + Device(deviceName : DeviceNameVO, deviceModel : DeviceModelVO, roomID : RoomIDVO)
+                     + Device(deviceID : DeviceIDVO, deviceName : DeviceNameVO, deviceModel : DeviceModelVO, roomID : RoomIDVO, deviceStatus : DeviceStatusVO)
+                 }
+
+
+class DeviceMapper {
+    - ERRORMESSAGE : String
+
+    + domainToDTO (map : Map<String, List<Device>>) : LinkedHashMap<String, List<DeviceDTO>>
+}
+
+class DeviceDTO {
+    - deviceID : String
+    - deviceName : String
+    - deviceModel : String
+    - deviceStatus : String
+    - roomID : String
+
+}
+
+interface RepresentationModel{
+}
+
+interface Repository {
+    + findAll() : Iterable<T>
+    + findByID (id : ID) : T
+}
+
+DeviceService <.. DeviceCTRLWeb
+DeviceMapper <.. DeviceCTRLWeb
+DeviceMapper <.. GetListOfDevicesByFunctionalityCtrl
+DeviceService <|.. DeviceServiceImpl
+
+SensorRepository <|..left DeviceServiceImpl
+ActuatorRepository <|.. DeviceServiceImpl
+DeviceRepository <|.. DeviceServiceImpl
+RepresentationModel <|.. DeviceDTO
+Sensor ..o SensorRepository
+Actuator ..o ActuatorRepository
+Device .o DeviceRepository
+
+Sensor <.. DeviceServiceImpl
+Actuator <.. DeviceServiceImpl
+
+GetListOfDevicesByFunctionalityCtrl ..> DeviceService
+
+Repository <.. SensorRepository
+Repository <|.. ActuatorRepository
+Repository <.. DeviceRepository
+DeviceRepository <|.. DeviceRepositoryJPA
+DeviceRepositoryJPA ..> DeviceAssembler
+DeviceRepositoryJPA ..o DeviceDataModel :  >
+DeviceRepositorySpringData --.|> DeviceRepository
+DeviceRepositorySpringData ..|> IDeviceRepositorySpringData
+DeviceRepositorySpringData ..o DeviceDataModel : >
+
+DeviceDTO <.. DeviceMapper
+
+@enduml
+

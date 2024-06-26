@@ -1,0 +1,388 @@
+@startuml
+title Domain Class Diagram - General Overview\n Implementation View Level 4 - 3rd Granularity
+
+skinparam linetype ortho
+
+package "House Aggregate" {
+
+    class House {
+        + House(locationVO : LocationVO)
+        + House(houseIDVO : HouseIDVO, locationVO : LocationVO)
+        + configureLocation(location : LocationVO) : boolean
+    }
+
+
+
+    class LocationVO {
+        + LocationVO(addressVO : AddressVO, gpsVO : GpsVO)
+    }
+
+    class AddressVO {
+        + AddressVO(doorVO : DoorVO, streetVO : StreetVO, cityVO : CityVO, countryVO : CountryVO, postalCodeVO : PostalCodeVO)
+
+    }
+
+    class GpsVO {
+        + GpsVO(latitude : LatitudeVO, longitude : LongitudeVO)
+    }
+
+    class DoorVO {
+    - door : String
+
+        + DoorVO(door : String)
+    }
+
+    class StreetVO {
+    - street : String
+
+        + StreetVO(street : String)
+    }
+
+    class CityVO {
+    - city : String
+
+        + CityVO(city : String)
+    }
+
+    class CountryVO {
+    - country : String
+
+        + CountryVO(country : String)
+    }
+
+    class PostalCodeVO {
+    - postalCode : String
+
+        + PostalCodeVO(postalCode : String)
+    }
+
+    class LatitudeVO {
+    - latitudeValue : double
+
+        + LatitudeVO(latitudeValue : double)
+    }
+
+    class LongitudeVO {
+    - longitudeValue : double
+
+        + LongitudeVO(longitudeValue : double)
+    }
+    }
+
+    class HouseIDVO {
+    - identifier : UUID
+
+        + HouseIDVO(identifier : UUID)
+    }
+
+
+    package "Room Aggregate" {
+
+    class Room{
+    + Room(roomName : RoomNameVO, floor : RoomFloorVO, roomDimensions : RoomDimensionsVO, houseID : HouseIDVO)
+    + Room(roomID : RoomIDVO, roomName : RoomNameVO, floor : RoomFloorVO, roomDimensions : RoomDimensionsVO, houseID : HouseIDVO)
+
+    }
+
+    class RoomNameVO {
+    - roomName : String
+
+        + RoomNameVO(roomName : String)
+    }
+
+    class RoomFloorVO {
+    - roomFloor : int
+
+        + RoomFloorVO(roomFloor : int)
+    }
+
+    class RoomDimensionsVO {
+    + RoomDimensionsVO(length : RoomLengthVO, width : RoomWidthVO, height : RoomHeightVO)
+    }
+
+    class RoomLengthVO {
+    - length : double
+
+        + RoomLengthVO(length : double)
+    }
+
+    class RoomWidthVO {
+    - roomWidth : double
+
+        + RoomWidthVO(roomWidth : double)
+    }
+
+    class RoomHeightVO {
+    - height : double
+
+        + RoomHeightVO(height : double)
+    }
+
+    }
+    class RoomIDVO {
+    - identifier : UUID
+
+        + RoomIDVO(identifier : UUID)
+
+}
+
+package "Device Aggregate" {
+
+    class Device {
+    + Device(deviceName : DeviceNameVO, deviceModel : DeviceModelVO, roomID : RoomIDVO)
+    + Device(deviceIDVO : DeviceIDVO, deviceName : DeviceNameVO, deviceModel : DeviceModelVO, deviceStatusVO : DeviceStatusVO, roomID : RoomIDVO)
+    + deactivateDevice() : boolean
+    }
+
+    class DeviceNameVO {
+    - deviceName : String
+
+        + DeviceNameVO(deviceName : String)
+    }
+
+    class DeviceModelVO {
+    - deviceModel : String
+
+        + DeviceModelVO(deviceModel : String)
+    }
+
+    class DeviceStatusVO {
+    - deviceStatus : boolean
+
+        + DeviceStatusVO(deviceStatus : boolean)
+    }
+    }
+
+    class DeviceIDVO {
+    - deviceID : UUID
+
+        + DeviceIDVO(deviceID : UUID)
+    }
+
+    package "Sensor Aggregate"{
+    interface Sensor {
+    + getSensorTypeID() : SensorTypeIDVO
+    + getDeviceID() : DeviceIDVO
+    + getSensorName() : SensorNameVO
+
+    }
+
+    class SensorNameVO {
+    - sensorName : String
+
+        + SensorNameVO(sensorName : String)
+    }
+
+    interface SensorValueObject {
+    }
+    }
+    class SensorIDVO {
+    - identifier : UUID
+
+        + SensorIDVO(identifier : UUID)
+    }
+
+    package "SensorType Aggregate"{
+    class SensorType {
+    + SensorType(sensorTypeID : SensorTypeIDVO, sensorUnit : SensorUnitVO)
+}
+    class UnitVO {
+    - unit : String
+
+        + UnitVO(unit : String)
+    }
+    }
+    class SensorTypeIDVO {
+    - sensorTypeID : String
+
+        + SensorTypeIDVO(sensorTypeID : String)
+    }
+
+    package "Actuator Aggregate"{
+    interface Actuator {
+    + getActuatorTypeID() : ActuatorTypeIDVO
+    + getDeviceID() : DeviceIDVO
+    + getActuatorName() : ActuatorNameVO
+    }
+
+    class ActuatorNameVO {
+    - actuatorName : String
+
+        + ActuatorNameVO(actuatorName : String)
+    }
+
+    }
+    class ActuatorIDVO {
+    - identifier : UUID
+
+        + ActuatorIDVO(identifier : UUID)
+    }
+
+
+
+
+
+    package "ActuatorType Aggregate"{
+       class ActuatorType {
+       + ActuatorType(actuatorTypeIDVO : ActuatorTypeIDVO)
+       }
+       }
+
+   class ActuatorTypeIDVO{
+   - actuatorTypeID : String
+
+   + ActuatorTypeIDVO(actuatorTypeID : String)
+   }
+
+
+   package "Log Aggregate"{
+    class Log {
+    +Log(reading : SensorValueObject<?>, sensorID : SensorIDVO, deviceID : DeviceIDVO, sensorTypeID : SensorTypeIDVO)
+    +Log(logID : LogIDVO, time : TimeStampVO, reading : SensorValueObject<?>, sensorID : SensorIDVO, deviceID : DeviceIDVO, sensorTypeID : SensorTypeIDVO)
+
+    }
+    class TimeStampVO {
+    - timeStamp : LocalDateTime
+    - ERROR : String
+
+    + TimeStampVO(date : String, time : String)
+    + TimeStampVO(localDateTime : LocalDateTime)
+    }
+    }
+    class LogIDVO {
+    - identifier : UUID
+
+    + LogIDVO(identifier : UUID)
+    }
+
+       package "Repository Aggregate"{
+        interface Repository {
+        + save() : boolean
+        + findAll() : Iterable<T>
+        + findById() : Optional<T>
+        + isPresent() : boolean
+        }
+
+
+
+
+
+        interface HouseRepository {
+        + getFirstHouse() : Optional<House>
+        + getFirstHouseIDVO() : HouseIDVO
+        + update(house : House) : boolean
+        }
+
+
+
+        interface RoomRepository {
+        }
+
+            interface DeviceRepository {
+                + findByRoomID(roomID : RoomIDVO) : Iterable<Device>
+                + update(device : Device) : boolean
+
+                }
+
+        interface SensorRepository {
+        }
+
+        interface SensorTypeRepository {
+        }
+
+        interface ActuatorRepository {
+                }
+
+     interface ActuatorTypeRepository {
+                }
+
+                    interface LogRepository {
+                        + findByDeviceIDAndTimeBetween(deviceID : DeviceIDVO, from : TimeStampVO, to : TimeStampVO) : Iterable<Log>
+                        + getDeviceTemperatureLogs(deviceID : DeviceIDVO, sensorType : String, start : TimeStampVO, end : TimeStampVO) : Iterable<Log>
+                        }
+
+
+
+   }
+
+'CONNECTIONS
+
+House "1" *---- "1" HouseIDVO : contains
+House "1" *-- "1" LocationVO : contains
+
+LocationVO "1" *-- "1" AddressVO : contains
+LocationVO "1" *-- "1" GpsVO : contains
+
+AddressVO "1" *-- "1" DoorVO : contains
+AddressVO "1" *-- "1" StreetVO : contains
+AddressVO "1" *-- "1" CityVO : contains
+AddressVO "1" *-- "1" CountryVO : contains
+AddressVO "1" *-- "1" PostalCodeVO : contains
+
+GpsVO "1" *-- "1" LatitudeVO : contains
+GpsVO "1" *-- "1" LongitudeVO : contains
+
+
+Room "1" *---- "1" RoomIDVO : contains
+Room "1" *-- "1" RoomNameVO : contains
+Room "1" *-- "1" RoomFloorVO : contains
+Room "1" *-- "1" HouseIDVO : contains
+Room "1" *-- "1" RoomDimensionsVO : contains
+
+RoomDimensionsVO "1" *-- "1" RoomLengthVO : contains
+RoomDimensionsVO "1" *-- "1" RoomWidthVO : contains
+RoomDimensionsVO "1" *-- "1" RoomHeightVO : contains
+
+
+Device "1" *----- "1" DeviceIDVO : contains
+Device "1" *-- "1" DeviceNameVO : contains
+Device "1" *-- "1" DeviceModelVO : contains
+Device "1" *-- "1" DeviceStatusVO : contains
+Device "1" *-- "1" RoomIDVO : contains
+
+
+Sensor "1" *---- "1" SensorIDVO : contains
+Sensor "1" *-- "1" DeviceIDVO : contains
+Sensor "1" *-- "1" SensorNameVO : contains
+Sensor "1" *---- "1" SensorTypeIDVO : contains
+Sensor "1" *-left- "1" SensorValueObject : contains
+
+
+SensorType "1" *-- "1" SensorTypeIDVO : contains
+SensorType "1" *-- "1" UnitVO : contains
+
+
+Actuator "1" *---- "1" ActuatorIDVO : contains
+Actuator "1" *-- "1" DeviceIDVO : contains
+Actuator "1" *-- "1" ActuatorNameVO : contains
+Actuator "1" *---- "1" ActuatorTypeIDVO : contains
+
+
+ActuatorType "1" *---- "1" ActuatorTypeIDVO : contains
+
+
+Log "1" *---"1" LogIDVO : contains
+Log "1" *-- "1" TimeStampVO : contains
+Log "1" *-- "1" DeviceIDVO : contains
+
+HouseRepository -up-|> Repository : extends
+RoomRepository -up-|> Repository : extends
+DeviceRepository -up-|> Repository : extends
+SensorRepository -up-|> Repository : extends
+SensorTypeRepository -up-|> Repository : extends
+ActuatorRepository -up-|> Repository : extends
+ActuatorTypeRepository -up-|> Repository : extends
+LogRepository -up-|> Repository : extends
+
+
+HouseRepository "1" *---|> "*" House : contains
+RoomRepository "1" *---|> "*" Room : contains
+DeviceRepository "1" *---|> "*" Device : contains
+SensorRepository "1" *---|> "*" Sensor : contains
+SensorTypeRepository "1" *---|> "*" SensorType : contains
+ActuatorRepository "1" *---|> "*" Actuator : contains
+ActuatorTypeRepository "1" *--|> "*" ActuatorType : contains
+LogRepository "1" *-----|> "*" Log : contains
+
+
+@enduml

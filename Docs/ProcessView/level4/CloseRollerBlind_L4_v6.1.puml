@@ -1,0 +1,123 @@
+@startuml
+
+title Close Roller Blind : Main Success Scenario
+autonumber
+
+participant ":Router" as R
+participant ":ActuatorCTRLWeb" as ACW
+participant ":ActuatorMapper" as AM
+participant "actuatorIDVO:ActuatorIDVO" as AID
+participant "actuatorDTO:ActuatorDTO" as AD
+participant ":ActuatorService" as AS
+participant ":ActuatorRepository" as AR
+participant ":ActuatorAssembler" as AA
+participant ":ActuatorFactory" as AF
+participant "actuator:Actuator" as A
+participant ":Driver" as D
+participant "actuatorDataModel:ActuatorDataModel" as ADT
+participant "simHardwareAct:ActuatorExternalService" as AES
+
+[o-> R : POST /actuators/{actuatorId}
+activate R
+
+R -> ACW : closeRollerBlind(actuatorId)
+activate ACW
+
+ACW -> AM : createActuatorIDVO(actuatorId)
+activate AM
+
+AM -> AID** : create(actuatorId)
+
+AM --> ACW : **actuatorIDVO**
+deactivate AM
+
+ACW -> AS : closeRollerBlind(actuatorIDVO)
+activate AS
+
+AS -> AR : isPresent(actuatorIDVO)
+activate AR
+
+AR --> AS : **true**
+deactivate AR
+
+AS -> AR : findById(actuatorIDVO)
+activate AR
+
+AR -> AR : **actuatorIDStr** = getActuatorIdAsString(actuatorIDVO)
+activate AR
+deactivate AR
+
+AR -> D : READ(actuatorIDStr)
+activate D
+
+D ->o] : READ(actuatorIDStr)
+
+D <--o] : **data**
+D -> ADT** :
+
+note left : Driver deserializes data into actuator data model.
+
+D --> AR : **actuatorDataModel**
+deactivate D
+
+AR -> AA : toDomain(actuatorFactory, actuatorDataModel)
+activate AA
+
+
+AA -> AF : createActuator(actuatorDataModel)
+activate AF
+
+note right: Extracted attributes from actuator data model
+AF -> A** : create(actuatorId,actuatorName,\nactuatorType,deviceId,settings)
+AF--> AA : **actuator**
+deactivate AF
+
+AA --> AR : **actuator**
+deactivate AA
+
+AR --> AS : **actuator**
+deactivate AR
+
+AS -> A : getActuatorTypeID()
+activate A
+
+A --> AS : **actuatorType**
+deactivate A
+
+AS -> AS : isRollerBlind(actuatorType)
+activate AS
+deactivate AS
+
+AS -> AS : **position** = 0
+activate AS
+deactivate AS
+
+AS -> A : executeCommand(actuatorExternalService, position)
+activate A
+
+A -> A: validateCommand(position)
+activate A
+deactivate A
+
+A -> AES : executeCommandSim(position)
+activate AES
+
+note right: Abstracted operations as they\n assume external communication
+AES ->o] :
+
+AES --> A : **true**
+deactivate AES
+
+A --> AS : **true**
+deactivate A
+
+AS --> ACW : **true**
+deactivate AS
+
+ACW --> R : **HttpStatus.OK**
+deactivate ACW
+
+[o<-- R : **HttpStatus.OK**
+deactivate R
+
+@enduml

@@ -1,0 +1,27 @@
+@startuml
+
+title Use Case - Add Device to Room\nProcess View Level 2 \nSuccess Scenario
+autonumber
+
+!pragma teoz true
+box "  <<System>>\n:SmartHome" #DarkGrey
+
+participant "**<<container (C4)>>**\n:Frontend" as FE
+participant "**<<container (C4)>>**\n:Backend" as BE
+
+[o-> FE : Add a new device to this room
+activate FE
+[o<-- FE : Request device data
+|||
+[o-> FE : Provide device data
+
+FE -> BE : POST /devices (device information)
+activate BE
+BE --> FE : new device data + HTTP Status
+deactivate BE
+[o<-- FE : Device added!
+deactivate FE
+
+end box
+
+@enduml

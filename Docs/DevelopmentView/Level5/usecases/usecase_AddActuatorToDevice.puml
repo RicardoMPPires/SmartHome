@@ -1,0 +1,248 @@
+@startuml
+
+title <size: 30> Use Case: Add actuator to device v6.0\n Development view level 5- class diagram
+note "<b>Only methods related to\n<b>Add Actuator to Device are represented" as N1
+skinparam linetype ortho
+
+       ActuatorCTRLWeb ..> ActuatorMapper
+       ActuatorCTRLWeb ..> ActuatorTypeMapper
+       ActuatorCTRLWeb ..> DeviceMapper
+       ActuatorCTRLWeb ..> ActuatorService
+       ActuatorServiceImpl ..|> ActuatorService
+       ActuatorServiceImpl ..> ActuatorFactory
+       ActuatorFactoryImpl .up.|> ActuatorFactory
+       ActuatorServiceImpl .up.> ActuatorTypeRepository
+       ActuatorServiceImpl .up.> ActuatorRepository
+       ActuatorServiceImpl .up.> DeviceRepository
+       ActuatorServiceImpl ..> Device
+       ActuatorFactoryImpl -down- SwitchActuator : creates >
+       ActuatorFactoryImpl -down- RollerBlindActuator : creates >
+       ActuatorFactoryImpl -down- IntegerActuator : creates >
+       ActuatorFactoryImpl -down- DecimalActuator : creates >
+       AggregateRoot <|-up- Actuator
+       Actuator <|.up. SwitchActuator
+       Actuator <|.up. RollerBlindActuator
+       Actuator <|.up. IntegerActuator
+       Actuator <|.up. DecimalActuator
+       Device ..|> AggregateRoot
+       DeviceMapper ..> DeviceDTO
+       DeviceDTO -- DeviceIDVO : creates >
+       ActuatorMapper ..> ActuatorDTO
+       ActuatorDTO -- ActuatorNameVO : creates >
+       ActuatorTypeMapper ..> ActuatorTypeDTO
+       ActuatorTypeDTO -- ActuatorTypeIDVO : creates >
+       DeviceRepository --|> Repository
+       ActuatorRepository --|> Repository
+       ActuatorTypeRepository --|> Repository
+       ActuatorDTO -- IntegerSettingsVO : creates >
+       ActuatorDTO -- DecimalSettingsVO : creates >
+       IntegerSettingsVO ..|> Settings
+       DecimalSettingsVO ..|> Settings
+       Settings --|> ValueObject
+       ActuatorNameVO ..|> ValueObject
+       ActuatorTypeIDVO ..|> DomainID
+       DeviceIDVO ..|> DomainID
+       ActuatorRepositoryMem ..|> ActuatorRepository
+       ActuatorRepositoryJPA ..|> ActuatorRepository
+       ActuatorRepositorySpringData ..|> ActuatorRepository
+       ActuatorRepositoryJPA -up- "*"ActuatorDataModel : create >
+       ActuatorRepositorySpringData -up- "*"ActuatorDataModel : create >
+       ActuatorRepositorySpringData .> IActuatorRepositorySpringData
+
+
+
+    class ActuatorCTRLWeb{
+        -actuatorService: ActuatorService
+        +ActuatorCTRL(actuatorService)
+        +addActuatorToDevice(actuator DTO: ActuatorDTO): ResponseEntity<ActuatorDTO>
+    }
+
+    class ActuatorServiceImpl{
+        -actuatorRepository: ActuatorRepository
+        -actuatorFactory: ActuatorFactory
+        -actuatorTypeRepository: ActuatorTypeRepository
+        -deviceRepository: DeviceRepository
+        +ActuatorServiceImpl(actuatorFactory, actuatorRepository, actuatorTypeRepository, deviceRepository)
+        +addActuator(actuatorNameVO, deviceIDVO, actuatorTypeIDVO): boolean
+    }
+
+    class ActuatorRepositoryMem{
+        -actuatorMap : Map<ActuatorIDVO, Actuator>
+        +save(actuator : Actuator): boolean
+    }
+
+    class ActuatorRepositoryJPA{
+            -actuatorFactory : ActuatorFactory
+            -entityManagerFactory : EntityManagerFactory
+            +save(actuator : Actuator): boolean
+    }
+
+    class ActuatorRepositorySpringData{
+                -iActuatorRepositorySpringData : IActuatorRepositorySpringData
+                -actuatorFactory : ActuatorFactory
+                +save(actuator : Actuator): boolean
+        }
+
+    interface IActuatorRepositorySpringData{
+     }
+
+    class ActuatorFactoryImpl{
+        -configuration: Configuration
+        +ActuatorFactoryImpl(filePath : String)
+    }
+
+    class ActuatorMapper{
+        +createActuatorNameVO(actuatorDTO): ActuatorNameVO
+        +createSettingsVO(actuatorDTO): Settings
+    }
+
+    class ActuatorTypeMapper{
+        +createActuatorTypeIDVO(actuatorTypeDTO): ActuatorTypeIDVO
+    }
+
+    class DeviceMapper{
+        +createDeviceIDVO(deviceDTO): DeviceIDVO
+    }
+
+    class Device {
+        -deviceName: DeviceNameVO
+        -deviceModel: DeviceModelVO
+        -roomID: RoomIDVO
+        -deviceStatus: DeviceStatusVO
+        -deviceIDVO: DeviceIDVO
+        +Device(deviceIDVO, deviceName, deviceModel, roomID, deviceStatus)
+        +isActive(device): boolean
+    }
+
+    class ActuatorDTO{
+        -actuatorName: String
+        -actuatorID: String
+        -deviceID: String
+        -actuatorType: String
+        +getActuatorName(): String
+    }
+
+    class ActuatorTypeDTO{
+        -actuatorTypeID: String
+        +getActuatorTypeID(): String
+    }
+
+    class DeviceDTO{
+        -deviceID: String
+        -deviceName: String
+        -deviceModel: String
+        -roomID: String
+        -deviceStatus: String
+        +getDeviceID(): String
+    }
+
+    interface Repository{
+        +save(ent: T): boolean
+    }
+
+    class ActuatorNameVO{
+            -actuatorName: String
+            +ActuatorNameVO(actuatorName)
+        }
+
+        class ActuatorTypeIDVO{
+            -actuatorTypeID: String
+            +ActuatorTypeIDVO(actuatorTypeID)
+        }
+
+        class DeviceIDVO{
+            -deviceID: UUID
+            +DeviceIDVO(deviceID : UUID)
+        }
+
+        class IntegerSettingsVO{
+        -lowerLimit: int
+        -upperLimit : int
+        -validLimits(lowerLimit, upperLimit): boolean
+        +getValue(): int[]
+        }
+
+        class DecimalSettingsVO{
+        -lowerLimit: double
+        -upperLimit : double
+        -precision : double
+        -validSettings(lowerLimit, upperLimit, precision): boolean
+        -countDecimalPlaces(value : double): int
+        +getValue(): double[]
+        }
+
+
+    interface Actuator{
+    +getActuatorTypeID() : ActuatorTypeIDVO
+    +getDeviceID() : DeviceIDVO
+    +getActuatorName() : ActuatorNameVO
+    +getLowerLimit() : String
+    +getUpperLimit() : String
+    +getPrecision() : String
+    }
+
+    interface AggregateRoot{
+    +getID() : DomainID
+    }
+
+    class SwitchActuator{
+    +getID() : ActuatorIDVO
+    }
+
+    class RollerBlindActuator{
+    +getID() : ActuatorIDVO
+    }
+
+    class IntegerActuator {
+    +getID() : ActuatorIDVO
+    }
+
+    class DecimalActuator{
+    +getID() : ActuatorIDVO
+    }
+
+    interface Settings{
+
+    }
+
+    interface ValueObject{
+    +getValue(): T
+    }
+
+    interface DomainID{
+        +getID(): String
+        }
+
+    interface ActuatorTypeRepository{
+
+                }
+
+    interface ActuatorService{
+        +addActuator(actuatorNameVO, deviceIDVO, actuatorTypeIDVO): boolean
+    }
+
+    interface ActuatorRepository{
+
+    }
+
+    interface DeviceRepository{
+
+    }
+
+   interface ActuatorFactory {
+    +createActuator(actuatorNameVO, actuatorTypeIDVO, deviceIDVO, settingsVO) : Actuator
+    +createActuator(actuatorIDVO, actuatorNameVO, actuatorTypeIDVO, deviceIDVO, settingsVO) : Actuator
+    }
+
+    class ActuatorDataModel{
+    -actuatorID: String
+    -actuatorName: String
+    -actuatorTypeID: String
+    -deviceID: String
+    -lowerLimit: String
+    -upperLimit: String
+    -precision: String
+    }
+
+
+@enduml

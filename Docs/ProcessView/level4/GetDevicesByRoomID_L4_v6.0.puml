@@ -1,0 +1,56 @@
+@startuml
+
+autonumber
+title Use Case - Get Devices by Room ID v6.0 - Main Success Scenario
+
+participant ":Router" as R
+participant ":DeviceCTRLWeb" as C
+participant ":DeviceMapper" as DM
+participant "roomIDVO : RoomIDVO" as RID
+participant ":DeviceService" as DS
+participant ":RoomRepository" as RR
+participant ":DeviceRepository" as DRM
+
+[o-> R : GET /devices?roomID={id}
+activate R
+R -> C : getDevicesByRoomId(id)
+activate C
+
+C -> DM : createRoomIDVO(id)
+activate DM
+DM -> RID** : create(id)
+DM -> C : **roomIDVO**
+deactivate DM
+
+C -> DS : getListOfDevicesInARoom(roomIDVO)
+activate DS
+
+DS -> RR : isPresent(roomIDVO)
+activate RR
+RR --> DS : **true**
+deactivate RR
+
+DS -> DRM : findByRoomID(roomIDVO)
+activate DRM
+DRM --> DS : **deviceList**
+deactivate DRM
+
+DS -> C : **deviceList**
+deactivate DS
+C -> DM : domainToDTO(device)
+
+activate DM
+loop for each device in device list
+DM -> DM : domainToDTO(deviceList)
+activate DM
+deactivate DM
+end loop
+DM --> C : **deviceDTOList**
+deactivate DM
+
+C --> R : **deviceDTOList, HttpStatus.OK**
+deactivate C
+[o<-- R : **deviceListJSON, HttpStatus.OK**
+deactivate R
+
+@enduml

@@ -1,0 +1,84 @@
+@startuml
+title <size: 30> SunsetSensor v6.1\n<size: 25>Development view level 5 - class diagram
+
+note "<b>Only methods related to Sunset \n<b> Sensor are represented" as 1
+
+skinparam linetype ortho
+
+interface Sensor {
+    + getSensorTypeID() : SensorTypeIDVO
+    + getDeviceID() : DeviceIDVO
+}
+
+class SensorIDVO {
+    - indentifier : UUID
+    + SensorIDVO(identifier : UUID) : SensorIDVO
+}
+
+class SensorNameVO {
+    - sensorName : String
+    + SensorNameVO(sensorName : String) : SensorNameVO
+    + getValue() : String
+}
+
+class SensorTypeIDVO {
+    - sensorTypeID : String
+    + SensorTypeIDVO(sensorTypeID : String) : SensorTypeIDVO
+}
+
+class DeviceIDVO {
+    - deviceID : UUID
+    + DeviceIDVO(deviceID : UUID) : DeviceIDVO
+}
+
+interface DomainID {
+    + getID() : String
+}
+
+interface ValueObject<T> {
+    + getValue() : T
+}
+
+class SunsetSensor {
+    - sensorID : SensorIDVO
+    - sensorName : SensorNameVO
+    - sensorTypeID : SensorTypeIDVO
+    - deviceID : DeviceIDVO
+    + SunsetSensor(sensorName : SensorNameVO,\n deviceID : DeviceIDVO,\n sensorTypeID : SensorTypeIDVO) : SunsetSensor
+    + getSunsetTime(date : String,\n gpsLocation : String,\n sunTimeCalculator : SunTimeCalculator) : ValueObject<ZonedDateTime>
+}
+
+class SunTimeValue {
+    - sunTime : ZonedDateTime
+    + SunTimeValue(sunTimeValue : ZonedDateTime)
+    + getValue() : ZonedDateTime
+}
+
+class SunTimeCalculator {
+    + computeSunset(date : String, gpsCoordinates : String) : ZonedDateTime
+}
+
+interface AggregateRoot{
+    + getID() : DomainID
+}
+
+interface SunTimesServices {
++ computeSunset(date : String, gpsCoordinates : String) : ZonedDateTime
+}
+
+SunsetSensor o-- SensorIDVO : <<has>>
+SunsetSensor o-- SensorTypeIDVO : <<has>>
+SunsetSensor o-- DeviceIDVO : <<has>>
+SunsetSensor o-- SensorNameVO : <<has>>
+SensorIDVO -down..|> DomainID
+SensorTypeIDVO -down..|> DomainID
+DeviceIDVO -down..|> DomainID
+SensorNameVO -left..|> ValueObject
+SunTimeValue -up..|> ValueObject
+SunsetSensor -left..> SunTimeValue : <<creates>>
+SunsetSensor -right..> SunTimeCalculator : <<uses>>
+SunsetSensor -up..|> Sensor
+Sensor -right--|>AggregateRoot
+SunTimeCalculator -up.|> SunTimesServices
+
+@enduml

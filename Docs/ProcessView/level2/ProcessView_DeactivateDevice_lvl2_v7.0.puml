@@ -1,0 +1,24 @@
+@startuml
+
+autonumber
+title Use Case - Deactivate a Device\nProcess View Level 2 \nSuccess Scenario
+
+
+!pragma teoz true
+box "  <<System>>\n:SmartHome" #DarkGrey
+
+participant "**<<container (C4)>>**\n:Frontend" as FE
+participant "**<<container (C4)>>**\n:Backend" as BE
+
+[o-> FE : Deactivate this device
+activate FE
+FE -> BE : PATCH /devices/{id}
+activate BE
+BE --> FE : new device data + HTTP Status
+deactivate BE
+[o<-- FE : Device deactivated!
+deactivate FE
+
+end box
+
+@enduml

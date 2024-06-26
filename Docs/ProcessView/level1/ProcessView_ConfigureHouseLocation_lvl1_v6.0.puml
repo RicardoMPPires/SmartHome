@@ -1,0 +1,21 @@
+@startuml
+
+title Use Case - Configure the Location of the House \nProcess View Level 1 \nSuccess Scenario
+autonumber
+
+actor "Administrator" as A
+participant "<<**system (C4)**>>\nSmartHome" as SH
+
+A -> SH : I want to configure the house location
+activate A
+activate SH
+SH --> A : Request new location data
+deactivate SH
+A -> SH : Provides location data
+activate SH
+SH --> A : The house location was updated
+deactivate SH
+deactivate A
+
+
+@enduml
